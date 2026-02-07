@@ -7,15 +7,10 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
         stage('Build & Test') {
             steps {
-                bat 'mvnw.cmd clean verify -B'
+                sh 'mvnw.cmd clean verify -B'
             }
         }
 
@@ -25,7 +20,7 @@ pipeline {
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
-                            bat 'mvnw.cmd sonar:sonar -B'
+                            sh 'mvnw.cmd sonar:sonar -B'
                         }
                     } catch (Exception e) {
                         echo "SonarQube no configurado - saltando análisis: ${e.message}"
