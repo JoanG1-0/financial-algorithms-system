@@ -10,6 +10,7 @@ pipeline {
 
         stage('Build & Test') {
             steps {
+                sh 'chmod +x ./mvnw.cmd'
                 sh './mvnw.cmd clean verify -B'
             }
         }
@@ -20,6 +21,7 @@ pipeline {
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
+                            sh 'chmod +x ./mvnw.cmd'
                             sh './mvnw.cmd sonar:sonar -B'
                         }
                     } catch (Exception e) {
