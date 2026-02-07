@@ -1,0 +1,86 @@
+# =============================================================================
+# Sprint 0 - Infraestructura base
+# Levanta: PostgreSQL, Jenkins, SonarQube
+# Comando: docker-compose up -d
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL - Base de datos por microservicio (US-03)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: financial-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db:/docker-entrypoint-initdb.d
+    networks:
+      - financial-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Jenkins - CI/CD (US-04)
+  # ---------------------------------------------------------------------------
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: financial-jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    environment:
+      JAVA_OPTS: "-Djava.awt.headless=true -Xmx512m"
+    networks:
+      - financial-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # SonarQube - Calidad de código (US-34)
+  # Community Edition usa base de datos embebida (H2)
+  # ---------------------------------------------------------------------------
+  sonarqube:
+    image: sonarqube:10.3.0-community
+    container_name: financial-sonarqube
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - financial-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+# =============================================================================
+# Volúmenes persistentes - Los datos sobreviven a reinicios
+# =============================================================================
+volumes:
+  postgres_data:
+  jenkins_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+
+# =============================================================================
+# Red común - Los servicios se comunican por nombre
+# =============================================================================
+networks:
+  financial-network:
+    driver: bridge
