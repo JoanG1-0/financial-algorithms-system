@@ -24,7 +24,10 @@ pipeline {
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
-                            sh 'mvn sonar:sonar -B'
+                            sh '''
+                            mvn sonar:sonar \
+                            -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml
+                            '''
                         }
                     } catch (Exception e) {
                         echo "SonarQube no configurado - saltando análisis: ${e.message}"
