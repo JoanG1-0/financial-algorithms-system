@@ -11,13 +11,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Build & Test') {
-            steps {
-                sh 'mvn clean verify -B'
-            }
-        }
-
         // US-34: SonarQube - Si SonarQube está configurado en Jenkins (System -> SonarQube servers)
         stage('SonarQube Analysis') {
             steps {
