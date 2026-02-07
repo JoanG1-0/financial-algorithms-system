@@ -10,8 +10,7 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh 'chmod +x ./mvnw.cmd'
-                sh './mvnw.cmd clean verify -B'
+                sh 'mvn clean verify -B'
             }
         }
 
@@ -21,8 +20,7 @@ pipeline {
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
-                            sh 'chmod +x ./mvnw.cmd'
-                            sh './mvnw.cmd sonar:sonar -B'
+                            sh 'mvn sonar:sonar -B'
                         }
                     } catch (Exception e) {
                         echo "SonarQube no configurado - saltando análisis: ${e.message}"
