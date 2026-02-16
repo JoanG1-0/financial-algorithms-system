@@ -23,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
     }
 )
 @Tag("integration")
-class TwelveDataHttpClientIntegration {
+class TwelveDataHttpClientIT {
 
     @Autowired
     private TwelveDataHttpClient client;

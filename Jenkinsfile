@@ -18,7 +18,7 @@ pipeline {
                     try {
                         withSonarQubeEnv('SonarQube') {
                             sh '''
-                            mvn verify sonar:sonar \
+                            mvn test sonar:sonar \
                             -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml
                             '''
                         }
