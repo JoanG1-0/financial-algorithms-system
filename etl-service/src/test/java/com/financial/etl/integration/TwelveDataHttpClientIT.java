@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // Este test de integración descarga datos reales de Twelve Data usando la configuración real (API key en .env)
 
@@ -14,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 >>     set-item -path env:$name -value $value
 >> }
 >>
->> .\mvnw.cmd -pl etl-service -Dtest=*Integration test
+>> .\mvnw.cmd clean verify -Pintegration
 */
 
 @SpringBootTest(
@@ -33,7 +35,8 @@ class TwelveDataHttpClientIT {
 
         String response = client.downloadTimeSeries("AAPL");
 
-        System.out.println("Respuesta real de Twelve Data:");
-        System.out.println(response.substring(0, 500));
+        assertNotNull(response, "La respuesta no debe ser nula");
+        assertTrue(response.contains("\"meta\""), "La respuesta debe contener metadatos del activo");
+        assertTrue(response.contains("\"values\""), "La respuesta debe contener valores de la serie de tiempo");
     }
 }

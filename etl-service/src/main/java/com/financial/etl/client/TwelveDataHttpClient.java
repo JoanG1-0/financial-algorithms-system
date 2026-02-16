@@ -1,7 +1,9 @@
 package com.financial.etl.client;
 
 import com.financial.etl.config.TwelveDataConfig;
+import com.financial.etl.exception.DataDownloadException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -25,6 +27,11 @@ public class TwelveDataHttpClient {
                 config.getApiKey()
         );
 
-        return restTemplate.getForObject(url, String.class);
+        try {
+            return restTemplate.getForObject(url, String.class);
+        } catch (RestClientException e) {
+            throw new DataDownloadException(
+                    "Error descargando datos de TwelveData para el símbolo: " + symbol, e);
+        }
     }
 }
