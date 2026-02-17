@@ -45,3 +45,6 @@ allure-report/
 # JaCoCo
 jacoco.exec
 *.exec
+
+# Claude
+CLAUDE.md
