@@ -19,6 +19,8 @@ buildNumber.properties
 .classpath
 .settings/
 .vscode/
+.env
+launch.json
 
 # Java
 *.class
