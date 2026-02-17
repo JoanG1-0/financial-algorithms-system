@@ -35,6 +35,13 @@
         <!-- Testing & Quality -->
         <junit.version>5.10.2</junit.version>
         <allure.version>2.25.0</allure.version>
+
+        <!-- SonarQube - Exclusiones de cobertura -->
+        <sonar.coverage.exclusions>
+            **/*Application.java,
+            **/config/**,
+            **/exception/**
+        </sonar.coverage.exclusions>
     </properties>
 
     <!-- ========== Gestión de versiones (Dependency Management) ========== -->
