@@ -70,7 +70,7 @@ class EtlServiceTest {
     void extractAndLoad_callsClientParsesAndSaves() throws Exception {
         String rawJson = "{\"meta\":{},\"values\":[]}";
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
-        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(sampleResponse);
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(sampleResponse);
 
         FinancialSeries saved = new FinancialSeries();
         saved.setId(1L);
@@ -80,7 +80,7 @@ class EtlServiceTest {
         FinancialSeries result = etlService.extractAndLoad("AAPL");
 
         verify(httpClient).downloadTimeSeries("AAPL");
-        verify(objectMapper).readValue(eq(rawJson), eq(TimeSeriesResponse.class));
+        verify(objectMapper).readValue(rawJson, TimeSeriesResponse.class);
         verify(repository).save(any(FinancialSeries.class));
         assertThat(result.getSymbol()).isEqualTo("AAPL");
     }
@@ -89,7 +89,7 @@ class EtlServiceTest {
     void extractAndLoad_throwsJsonParsingException_whenObjectMapperFails() throws Exception {
         String rawJson = "invalid-json";
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
-        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class)))
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class))
                 .thenThrow(new JsonProcessingException("parse error") {});
 
         assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
@@ -107,7 +107,7 @@ class EtlServiceTest {
         errorResponse.setMessage("API limit exceeded");
 
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
-        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(errorResponse);
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(errorResponse);
 
         assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
                 .isInstanceOf(DataDownloadException.class)
@@ -124,7 +124,7 @@ class EtlServiceTest {
         errorResponse.setMessage(null);
 
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
-        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(errorResponse);
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(errorResponse);
 
         assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
                 .isInstanceOf(DataDownloadException.class)
@@ -141,7 +141,7 @@ class EtlServiceTest {
         responseWithNullValues.setValues(null);
 
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
-        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(responseWithNullValues);
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(responseWithNullValues);
 
         FinancialSeries saved = new FinancialSeries();
         saved.setSymbol("AAPL");
