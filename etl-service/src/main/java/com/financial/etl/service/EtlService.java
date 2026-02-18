@@ -35,6 +35,11 @@ public class EtlService {
 
     @Transactional
     public FinancialSeries extractAndLoad(String symbol) {
+        return extractAndLoad(symbol, null);
+    }
+
+    @Transactional
+    public FinancialSeries extractAndLoad(String symbol, Long batchId) {
         String json = httpClient.downloadTimeSeries(symbol);
 
         TimeSeriesResponse response;
@@ -58,6 +63,7 @@ public class EtlService {
         series.setExchangeTimezone(meta.getExchangeTimezone());
         series.setMicCode(meta.getMicCode());
         series.setType(meta.getType());
+        series.setBatchId(batchId);
 
         if (response.getValues() != null) {
             for (TimeSeriesValue v : response.getValues()) {
