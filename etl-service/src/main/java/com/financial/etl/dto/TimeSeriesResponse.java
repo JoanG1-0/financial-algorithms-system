@@ -1,9 +1,13 @@
 package com.financial.etl.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeSeriesResponse {
 
@@ -11,36 +15,4 @@ public class TimeSeriesResponse {
     private List<TimeSeriesValue> values;
     private String status;
     private String message;
-
-    public TimeSeriesMeta getMeta() {
-        return meta;
-    }
-
-    public void setMeta(TimeSeriesMeta meta) {
-        this.meta = meta;
-    }
-
-    public List<TimeSeriesValue> getValues() {
-        return values;
-    }
-
-    public void setValues(List<TimeSeriesValue> values) {
-        this.values = values;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }
