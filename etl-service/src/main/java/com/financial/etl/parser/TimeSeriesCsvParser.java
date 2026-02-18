@@ -23,8 +23,6 @@ public class TimeSeriesCsvParser {
         try {
             TimeSeriesResponse response = objectMapper.readValue(json, TimeSeriesResponse.class);
             return buildCsv(response.getValues());
-        } catch (JsonParsingException e) {
-            throw e;
         } catch (Exception e) {
             throw new JsonParsingException("Error al parsear el JSON de la serie de tiempo", e);
         }

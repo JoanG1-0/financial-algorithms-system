@@ -72,4 +72,17 @@ class TimeSeriesCsvParserTest {
 
         assertEquals("datetime,open,high,low,close,volume", csv);
     }
+
+    @Test
+    void shouldHandleNullValuesField() {
+        String json = """
+                {
+                  "meta": { "symbol": "AAPL" }
+                }
+                """;
+
+        String csv = parser.convertToCsv(json);
+
+        assertEquals("datetime,open,high,low,close,volume", csv);
+    }
 }
