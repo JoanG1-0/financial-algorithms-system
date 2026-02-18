@@ -61,15 +61,15 @@ public class EtlService {
 
         if (response.getValues() != null) {
             for (TimeSeriesValue v : response.getValues()) {
-                PriceRecord record = new PriceRecord();
-                record.setDatetime(LocalDate.parse(v.getDatetime()));
-                record.setOpen(new BigDecimal(v.getOpen()));
-                record.setHigh(new BigDecimal(v.getHigh()));
-                record.setLow(new BigDecimal(v.getLow()));
-                record.setClose(new BigDecimal(v.getClose()));
-                record.setVolume(Long.parseLong(v.getVolume()));
-                record.setSeries(series);
-                series.getPriceRecords().add(record);
+                PriceRecord priceRecord = new PriceRecord();
+                priceRecord.setDatetime(LocalDate.parse(v.getDatetime()));
+                priceRecord.setOpen(new BigDecimal(v.getOpen()));
+                priceRecord.setHigh(new BigDecimal(v.getHigh()));
+                priceRecord.setLow(new BigDecimal(v.getLow()));
+                priceRecord.setClose(new BigDecimal(v.getClose()));
+                priceRecord.setVolume(Long.parseLong(v.getVolume()));
+                priceRecord.setSeries(series);
+                series.getPriceRecords().add(priceRecord);
             }
         }
 
