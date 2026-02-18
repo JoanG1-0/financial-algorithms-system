@@ -1,5 +1,6 @@
 package com.financial.etl.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financial.etl.client.TwelveDataHttpClient;
 import com.financial.etl.dto.TimeSeriesMeta;
@@ -39,7 +40,7 @@ public class EtlService {
         TimeSeriesResponse response;
         try {
             response = objectMapper.readValue(json, TimeSeriesResponse.class);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new JsonParsingException("Error al parsear la respuesta JSON para: " + symbol, e);
         }
 

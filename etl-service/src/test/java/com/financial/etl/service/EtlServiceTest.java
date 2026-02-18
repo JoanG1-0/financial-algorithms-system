@@ -1,5 +1,6 @@
 package com.financial.etl.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financial.etl.client.TwelveDataHttpClient;
 import com.financial.etl.dto.TimeSeriesMeta;
@@ -89,7 +90,7 @@ class EtlServiceTest {
         String rawJson = "invalid-json";
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
         when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class)))
-                .thenThrow(new RuntimeException("parse error"));
+                .thenThrow(new JsonProcessingException("parse error") {});
 
         assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
                 .isInstanceOf(JsonParsingException.class)
