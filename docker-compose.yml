@@ -78,12 +78,13 @@ services:
     container_name: financial-etl
     ports:
       - "8082:8082"
+    env_file: 
+      - etl-service/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/etl_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-}
     networks:
       - financial-network
     depends_on:

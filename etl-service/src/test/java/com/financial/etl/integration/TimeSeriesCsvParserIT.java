@@ -2,10 +2,12 @@ package com.financial.etl.integration;
 
 import com.financial.etl.client.TwelveDataHttpClient;
 import com.financial.etl.parser.TimeSeriesCsvParser;
+import com.financial.etl.repository.FinancialSeriesRepository;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @Tag("integration")
 class TimeSeriesCsvParserIT {
+
+    @MockBean
+    private FinancialSeriesRepository financialSeriesRepository;
 
     @Autowired
     private TwelveDataHttpClient client;
