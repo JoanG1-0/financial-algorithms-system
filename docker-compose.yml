@@ -83,7 +83,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      TWELVE_DATA_API_KEY: 391cd5ddf24e4b2090481c1a1f5048f9
+      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:} # Variable de entorno para la API key de Twelve Data
     networks:
       - financial-network
     depends_on:
