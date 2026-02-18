@@ -58,8 +58,12 @@ class TimeSeriesDtoTest {
         TimeSeriesResponse response = new TimeSeriesResponse();
         response.setMeta(meta);
         response.setValues(values);
+        response.setStatus("ok");
+        response.setMessage("success");
 
         assertEquals(meta, response.getMeta());
         assertEquals(values, response.getValues());
+        assertEquals("ok", response.getStatus());
+        assertEquals("success", response.getMessage());
     }
 }

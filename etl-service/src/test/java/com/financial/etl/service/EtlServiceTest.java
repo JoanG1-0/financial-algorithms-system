@@ -6,6 +6,8 @@ import com.financial.etl.dto.TimeSeriesMeta;
 import com.financial.etl.dto.TimeSeriesResponse;
 import com.financial.etl.dto.TimeSeriesValue;
 import com.financial.etl.entity.FinancialSeries;
+import com.financial.etl.exception.DataDownloadException;
+import com.financial.etl.exception.JsonParsingException;
 import com.financial.etl.repository.FinancialSeriesRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -78,6 +80,74 @@ class EtlServiceTest {
 
         verify(httpClient).downloadTimeSeries("AAPL");
         verify(objectMapper).readValue(eq(rawJson), eq(TimeSeriesResponse.class));
+        verify(repository).save(any(FinancialSeries.class));
+        assertThat(result.getSymbol()).isEqualTo("AAPL");
+    }
+
+    @Test
+    void extractAndLoad_throwsJsonParsingException_whenObjectMapperFails() throws Exception {
+        String rawJson = "invalid-json";
+        when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
+        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class)))
+                .thenThrow(new RuntimeException("parse error"));
+
+        assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
+                .isInstanceOf(JsonParsingException.class)
+                .hasMessageContaining("AAPL");
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void extractAndLoad_throwsDataDownloadException_whenMetaIsNullWithMessage() throws Exception {
+        String rawJson = "{\"message\":\"API limit exceeded\"}";
+        TimeSeriesResponse errorResponse = new TimeSeriesResponse();
+        errorResponse.setMeta(null);
+        errorResponse.setMessage("API limit exceeded");
+
+        when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
+        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(errorResponse);
+
+        assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
+                .isInstanceOf(DataDownloadException.class)
+                .hasMessageContaining("API limit exceeded");
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void extractAndLoad_throwsDataDownloadException_whenMetaIsNullWithoutMessage() throws Exception {
+        String rawJson = "{}";
+        TimeSeriesResponse errorResponse = new TimeSeriesResponse();
+        errorResponse.setMeta(null);
+        errorResponse.setMessage(null);
+
+        when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
+        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(errorResponse);
+
+        assertThatThrownBy(() -> etlService.extractAndLoad("AAPL"))
+                .isInstanceOf(DataDownloadException.class)
+                .hasMessageContaining("respuesta inesperada de la API");
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void extractAndLoad_handlesNullResponseValues() throws Exception {
+        String rawJson = "{\"meta\":{}}";
+        TimeSeriesResponse responseWithNullValues = new TimeSeriesResponse();
+        responseWithNullValues.setMeta(sampleResponse.getMeta());
+        responseWithNullValues.setValues(null);
+
+        when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
+        when(objectMapper.readValue(eq(rawJson), eq(TimeSeriesResponse.class))).thenReturn(responseWithNullValues);
+
+        FinancialSeries saved = new FinancialSeries();
+        saved.setSymbol("AAPL");
+        when(repository.save(any(FinancialSeries.class))).thenReturn(saved);
+
+        FinancialSeries result = etlService.extractAndLoad("AAPL");
+
         verify(repository).save(any(FinancialSeries.class));
         assertThat(result.getSymbol()).isEqualTo("AAPL");
     }
