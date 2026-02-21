@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,6 +61,24 @@ class FinancialSeriesRepositoryTest {
     @Test
     void findByBatchId_returnsEmpty_whenNoBatchIdMatches() {
         List<FinancialSeries> result = repository.findByBatchId(999L);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findFirstBySymbol_returnsExisting_whenSymbolExists() {
+        FinancialSeries aapl = new FinancialSeries();
+        aapl.setSymbol("AAPL");
+        repository.save(aapl);
+
+        Optional<FinancialSeries> result = repository.findFirstBySymbol("AAPL");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getSymbol()).isEqualTo("AAPL");
+    }
+
+    @Test
+    void findFirstBySymbol_returnsEmpty_whenSymbolDoesNotExist() {
+        Optional<FinancialSeries> result = repository.findFirstBySymbol("UNKNOWN");
         assertThat(result).isEmpty();
     }
 }

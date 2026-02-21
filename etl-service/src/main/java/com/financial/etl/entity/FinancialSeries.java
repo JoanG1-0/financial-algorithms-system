@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,7 @@ public class FinancialSeries {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String symbol;
 
     @Column(name = "series_interval")
@@ -52,7 +54,8 @@ public class FinancialSeries {
     private List<PriceRecord> priceRecords = new ArrayList<>();
 
     @PrePersist
-    void prePersist() {
+    @PreUpdate
+    void onPersistOrUpdate() {
         this.loadedAt = LocalDateTime.now();
     }
 }
