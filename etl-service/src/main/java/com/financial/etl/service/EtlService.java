@@ -30,7 +30,7 @@ public class EtlService {
     public EtlService(TwelveDataHttpClient httpClient,
                       ObjectMapper objectMapper,
                       FinancialSeriesRepository repository,
-                      @Lazy EtlService self) {
+                      EtlService self) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.repository = repository;
