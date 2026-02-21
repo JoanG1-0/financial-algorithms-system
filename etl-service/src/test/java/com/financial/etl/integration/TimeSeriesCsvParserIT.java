@@ -4,6 +4,7 @@ import com.financial.etl.client.TwelveDataHttpClient;
 import com.financial.etl.parser.TimeSeriesCsvParser;
 import com.financial.etl.repository.FinancialSeriesRepository;
 import com.financial.etl.service.BatchDownloadService;
+import com.financial.etl.service.EtlService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ class TimeSeriesCsvParserIT {
 
     @MockBean
     private BatchDownloadService batchDownloadService;
+
+    @MockBean
+    private EtlService etlService;
 
     @Autowired
     private TwelveDataHttpClient client;

@@ -11,6 +11,7 @@ import com.financial.etl.entity.PriceRecord;
 import com.financial.etl.exception.DataDownloadException;
 import com.financial.etl.exception.JsonParsingException;
 import com.financial.etl.repository.FinancialSeriesRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class EtlService {
     public EtlService(TwelveDataHttpClient httpClient,
                       ObjectMapper objectMapper,
                       FinancialSeriesRepository repository,
-                      EtlService self) {
+                      @Lazy EtlService self) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.repository = repository;
