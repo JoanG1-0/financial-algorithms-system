@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+
 @Component
 public class TwelveDataHttpClient {
 
@@ -20,10 +22,15 @@ public class TwelveDataHttpClient {
 
     public String downloadTimeSeries(String symbol) {
 
+        String startDate = LocalDate.now().minusYears(5).toString();
+        String endDate   = LocalDate.now().toString();
+
         String url = String.format(
-                "%s/time_series?symbol=%s&interval=1day&apikey=%s",
+                "%s/time_series?symbol=%s&interval=1day&start_date=%s&end_date=%s&apikey=%s",
                 config.getBaseUrl(),
                 symbol,
+                startDate,
+                endDate,
                 config.getApiKey()
         );
 
