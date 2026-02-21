@@ -55,7 +55,9 @@ public class EtlService {
             throw new DataDownloadException("TwelveData rechazó la solicitud para '" + symbol + "': " + apiMessage, null);
         }
 
-        FinancialSeries series = new FinancialSeries();
+        FinancialSeries series = repository.findFirstBySymbol(meta.getSymbol())
+                .orElse(new FinancialSeries());
+
         series.setSymbol(meta.getSymbol());
         series.setInterval(meta.getInterval());
         series.setCurrency(meta.getCurrency());
@@ -65,6 +67,7 @@ public class EtlService {
         series.setType(meta.getType());
         series.setBatchId(batchId);
 
+        series.getPriceRecords().clear();
         if (response.getValues() != null) {
             for (TimeSeriesValue v : response.getValues()) {
                 PriceRecord priceRecord = new PriceRecord();

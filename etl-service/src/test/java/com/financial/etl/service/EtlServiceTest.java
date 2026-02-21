@@ -17,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,6 +73,7 @@ class EtlServiceTest {
         String rawJson = "{\"meta\":{},\"values\":[]}";
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
         when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(sampleResponse);
+        when(repository.findFirstBySymbol("AAPL")).thenReturn(Optional.empty());
 
         FinancialSeries saved = new FinancialSeries();
         saved.setId(1L);
@@ -83,6 +86,29 @@ class EtlServiceTest {
         verify(objectMapper).readValue(rawJson, TimeSeriesResponse.class);
         verify(repository).save(any(FinancialSeries.class));
         assertThat(result.getSymbol()).isEqualTo("AAPL");
+    }
+
+    @Test
+    void extractAndLoad_updatesExistingSeries_whenSymbolAlreadyExists() throws Exception {
+        String rawJson = "{\"meta\":{},\"values\":[]}";
+        when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
+        when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(sampleResponse);
+
+        FinancialSeries existing = new FinancialSeries();
+        existing.setId(42L);
+        existing.setSymbol("AAPL");
+        existing.setBatchId(1L);
+        when(repository.findFirstBySymbol("AAPL")).thenReturn(Optional.of(existing));
+
+        FinancialSeries saved = new FinancialSeries();
+        saved.setId(42L);
+        saved.setSymbol("AAPL");
+        when(repository.save(any(FinancialSeries.class))).thenReturn(saved);
+
+        FinancialSeries result = etlService.extractAndLoad("AAPL", 2L);
+
+        verify(repository).save(argThat(s -> s.getId() != null && s.getId().equals(42L)));
+        assertThat(result.getId()).isEqualTo(42L);
     }
 
     @Test
@@ -142,6 +168,7 @@ class EtlServiceTest {
 
         when(httpClient.downloadTimeSeries("AAPL")).thenReturn(rawJson);
         when(objectMapper.readValue(rawJson, TimeSeriesResponse.class)).thenReturn(responseWithNullValues);
+        when(repository.findFirstBySymbol("AAPL")).thenReturn(Optional.empty());
 
         FinancialSeries saved = new FinancialSeries();
         saved.setSymbol("AAPL");
