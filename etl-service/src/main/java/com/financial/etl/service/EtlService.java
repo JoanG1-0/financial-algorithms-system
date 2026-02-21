@@ -24,13 +24,16 @@ public class EtlService {
     private final TwelveDataHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final FinancialSeriesRepository repository;
+    private final EtlService self;
 
     public EtlService(TwelveDataHttpClient httpClient,
                       ObjectMapper objectMapper,
-                      FinancialSeriesRepository repository) {
+                      FinancialSeriesRepository repository,
+                      EtlService self) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.repository = repository;
+        this.self = self;
     }
 
     @Transactional
