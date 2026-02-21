@@ -38,4 +38,28 @@ class FinancialSeriesRepositoryTest {
         List<FinancialSeries> result = repository.findBySymbol("UNKNOWN");
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void findByBatchId_returnsMatchingRecords() {
+        FinancialSeries fs = new FinancialSeries();
+        fs.setSymbol("AAPL");
+        fs.setBatchId(42L);
+        repository.save(fs);
+
+        FinancialSeries other = new FinancialSeries();
+        other.setSymbol("MSFT");
+        other.setBatchId(99L);
+        repository.save(other);
+
+        List<FinancialSeries> result = repository.findByBatchId(42L);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getSymbol()).isEqualTo("AAPL");
+    }
+
+    @Test
+    void findByBatchId_returnsEmpty_whenNoBatchIdMatches() {
+        List<FinancialSeries> result = repository.findByBatchId(999L);
+        assertThat(result).isEmpty();
+    }
 }

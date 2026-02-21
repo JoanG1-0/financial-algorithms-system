@@ -164,4 +164,84 @@ class BatchDownloadServiceTest {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void downloadAllSymbols_skipsIfAlreadyCompletedWithErrorsToday() {
+        BatchDownloadLog existing = new BatchDownloadLog();
+        existing.setStatus(BatchStatus.COMPLETED_WITH_ERRORS);
+        when(logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now()))
+                .thenReturn(Optional.of(existing));
+
+        batchDownloadService.downloadAllSymbols();
+
+        verify(logRepository, never()).save(any(BatchDownloadLog.class));
+        verify(etlService, never()).extractAndLoad(anyString(), anyLong());
+    }
+
+    @Test
+    void downloadAllSymbols_retriesIfPreviousBatchFailed() {
+        BatchDownloadLog existing = new BatchDownloadLog();
+        existing.setStatus(BatchStatus.FAILED);
+        when(logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now()))
+                .thenReturn(Optional.of(existing));
+
+        BatchDownloadLog savedLog = new BatchDownloadLog();
+        savedLog.setId(1L);
+        savedLog.setTotalSymbols(3);
+        savedLog.setDownloadedSymbols(0);
+        savedLog.setFailedSymbols(0);
+        when(logRepository.save(any(BatchDownloadLog.class))).thenReturn(savedLog);
+        when(etlService.extractAndLoad(anyString(), eq(1L))).thenReturn(new FinancialSeries());
+
+        batchDownloadService.downloadAllSymbols();
+
+        verify(etlService, times(3)).extractAndLoad(anyString(), eq(1L));
+    }
+
+    @Test
+    void downloadAllSymbols_marksBatchAsFailed_whenFatalExceptionOccurs() {
+        BatchDownloadLog savedLog = new BatchDownloadLog();
+        savedLog.setId(1L);
+        savedLog.setTotalSymbols(3);
+        savedLog.setDownloadedSymbols(0);
+        savedLog.setFailedSymbols(0);
+
+        when(logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now()))
+                .thenReturn(Optional.empty());
+        when(logRepository.save(any(BatchDownloadLog.class)))
+                .thenReturn(savedLog)
+                .thenThrow(new RuntimeException("DB unavailable"))
+                .thenReturn(savedLog);
+        when(etlService.extractAndLoad(anyString(), eq(1L))).thenReturn(new FinancialSeries());
+
+        batchDownloadService.downloadAllSymbols();
+
+        ArgumentCaptor<BatchDownloadLog> captor = ArgumentCaptor.forClass(BatchDownloadLog.class);
+        verify(logRepository, atLeastOnce()).save(captor.capture());
+
+        List<BatchDownloadLog> savedLogs = captor.getAllValues();
+        BatchDownloadLog lastSave = savedLogs.get(savedLogs.size() - 1);
+        assertThat(lastSave.getStatus()).isEqualTo(BatchStatus.FAILED);
+    }
+
+    @Test
+    void downloadAllSymbols_processesMultipleBatches() {
+        ReflectionTestUtils.setField(batchDownloadService, "symbols", List.of("AAPL", "MSFT"));
+        ReflectionTestUtils.setField(batchDownloadService, "maxPerMinute", 1);
+
+        BatchDownloadLog savedLog = new BatchDownloadLog();
+        savedLog.setId(1L);
+        savedLog.setTotalSymbols(2);
+        savedLog.setDownloadedSymbols(0);
+        savedLog.setFailedSymbols(0);
+
+        when(logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now()))
+                .thenReturn(Optional.empty());
+        when(logRepository.save(any(BatchDownloadLog.class))).thenReturn(savedLog);
+        when(etlService.extractAndLoad(anyString(), eq(1L))).thenReturn(new FinancialSeries());
+
+        batchDownloadService.downloadAllSymbols();
+
+        verify(etlService, times(2)).extractAndLoad(anyString(), eq(1L));
+    }
 }
