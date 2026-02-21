@@ -45,6 +45,9 @@ public class FinancialSeries {
     @Column(name = "loaded_at")
     private LocalDateTime loadedAt;
 
+    @Column(name = "batch_id")
+    private Long batchId;
+
     @OneToMany(mappedBy = "series", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PriceRecord> priceRecords = new ArrayList<>();
 

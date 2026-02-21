@@ -8,4 +8,6 @@ import java.util.List;
 public interface FinancialSeriesRepository extends JpaRepository<FinancialSeries, Long> {
 
     List<FinancialSeries> findBySymbol(String symbol);
+
+    List<FinancialSeries> findByBatchId(Long batchId);
 }
