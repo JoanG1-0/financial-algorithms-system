@@ -39,7 +39,7 @@ public class EtlService {
 
     @Transactional
     public FinancialSeries extractAndLoad(String symbol) {
-        return extractAndLoad(symbol, null);
+        return self.extractAndLoad(symbol, null);
     }
 
     @Transactional
