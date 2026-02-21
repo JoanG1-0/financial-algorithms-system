@@ -126,10 +126,10 @@ class BatchDownloadServiceTest {
         when(logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now()))
                 .thenReturn(Optional.empty());
         when(logRepository.save(any(BatchDownloadLog.class))).thenReturn(savedLog);
-        when(etlService.extractAndLoad(eq("AAPL"), eq(1L))).thenReturn(new FinancialSeries());
-        when(etlService.extractAndLoad(eq("MSFT"), eq(1L)))
+        when(etlService.extractAndLoad("AAPL", 1L)).thenReturn(new FinancialSeries());
+        when(etlService.extractAndLoad("MSFT", 1L))
                 .thenThrow(new DataDownloadException("Error API"));
-        when(etlService.extractAndLoad(eq("GOOGL"), eq(1L))).thenReturn(new FinancialSeries());
+        when(etlService.extractAndLoad("GOOGL", 1L)).thenReturn(new FinancialSeries());
 
         batchDownloadService.downloadAllSymbols();
 
