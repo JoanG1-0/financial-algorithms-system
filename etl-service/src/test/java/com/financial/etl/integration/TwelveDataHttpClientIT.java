@@ -1,6 +1,7 @@
 package com.financial.etl.integration;
 
 import com.financial.etl.client.TwelveDataHttpClient;
+import com.financial.etl.repository.CleanedRecordRepository;
 import com.financial.etl.repository.FinancialSeriesRepository;
 import com.financial.etl.service.BatchDownloadService;
 import com.financial.etl.service.EtlService;
@@ -30,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 )
 @Tag("integration")
 class TwelveDataHttpClientIT {
+
+    @MockBean
+    private CleanedRecordRepository cleanedRecordRepository;
 
     @MockBean
     private FinancialSeriesRepository financialSeriesRepository;
