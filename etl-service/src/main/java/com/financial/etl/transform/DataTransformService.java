@@ -83,7 +83,10 @@ public class DataTransformService {
         }
 
         // Step 3: Persist (replace previous run)
+        // flush() forces Hibernate to send DELETE SQL before INSERT to avoid
+        // unique constraint (symbol, date) violations when re-running the pipeline
         cleanedRecordRepository.deleteAll();
+        cleanedRecordRepository.flush();
         cleanedRecordRepository.saveAll(allCleanedRecords);
 
         return buildSummary(allSeries.size(), calendar.size(), allCleanedRecords);
