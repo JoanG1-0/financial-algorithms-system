@@ -173,13 +173,22 @@ public class AlgorithmService {
                 double[] ra = toReturns(portfolio.get(ta));
                 double[] rb = toReturns(portfolio.get(tb));
 
+                // Euclidean, Pearson y Cosine requieren arrays del mismo tamaño.
+                // Distintos activos pueden tener diferente número de días de historia
+                // (feriados locales, suspensiones de trading, fecha de inicio distinta).
+                // Se trunca al mínimo común; DTW usa los arrays originales porque
+                // maneja longitudes distintas de forma nativa.
+                int minLen = Math.min(ra.length, rb.length);
+                double[] raAligned = Arrays.copyOf(ra, minLen);
+                double[] rbAligned = Arrays.copyOf(rb, minLen);
+
                 SimilarityRecord rec = new SimilarityRecord();
                 rec.setTickerA(ta);
                 rec.setTickerB(tb);
-                rec.setEuclidean(euclideanDistance.compute(ra, rb));
-                rec.setPearson(pearsonCorrelation.compute(ra, rb));
+                rec.setEuclidean(euclideanDistance.compute(raAligned, rbAligned));
+                rec.setPearson(pearsonCorrelation.compute(raAligned, rbAligned));
                 rec.setDtw(dynamicTimeWarping.compute(ra, rb));
-                rec.setCosine(cosineSimilarity.compute(ra, rb));
+                rec.setCosine(cosineSimilarity.compute(raAligned, rbAligned));
                 rec.setComputedAt(now);
                 records.add(rec);
             }

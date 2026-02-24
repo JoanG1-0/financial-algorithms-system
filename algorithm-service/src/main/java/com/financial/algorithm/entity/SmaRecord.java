@@ -20,6 +20,7 @@ public class SmaRecord {
     @Column(nullable = false)
     private String symbol;
 
+    @Column(name = "sma_window")
     private int window;
 
     @Column(columnDefinition = "TEXT")
