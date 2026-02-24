@@ -1,6 +1,6 @@
 # =============================================================================
 # Infraestructura + Servicios
-# Levanta: PostgreSQL, Jenkins, SonarQube, ETL Service
+# Levanta: PostgreSQL, Jenkins, SonarQube, ETL Service, Algorithm Service
 # Comando: docker-compose up -d
 # =============================================================================
 
@@ -90,6 +90,30 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Algorithm Service - Análisis algorítmico financiero
+  # ---------------------------------------------------------------------------
+  algorithm-service:
+    build:
+      context: .
+      dockerfile: algorithm-service/Dockerfile
+    container_name: financial-algorithm
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/algorithm_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      ETL_SERVICE_URL: http://etl-service:8082
+    networks:
+      - financial-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      etl-service:
+        condition: service_started
 
 # =============================================================================
 # Volúmenes persistentes - Los datos sobreviven a reinicios
