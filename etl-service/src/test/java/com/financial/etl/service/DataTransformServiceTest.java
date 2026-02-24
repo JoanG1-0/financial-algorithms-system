@@ -104,8 +104,8 @@ class DataTransformServiceTest {
 
         TransformSummary summary = service.transformAll();
 
-        assertThat(summary.getSymbolsProcessed()).isEqualTo(0);
-        assertThat(summary.getTotalRecords()).isEqualTo(0);
+        assertThat(summary.getSymbolsProcessed()).isZero();
+        assertThat(summary.getTotalRecords()).isZero();
         verify(cleanedRecordRepository).deleteAll();
         verify(cleanedRecordRepository).saveAll(argThat(it -> !it.iterator().hasNext()));
     }

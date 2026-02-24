@@ -16,18 +16,41 @@ public class TransformSummary {
     public TransformSummary() {
     }
 
-    public TransformSummary(int symbolsProcessed, int calendarDays, long totalRecords,
-                             long cleanRecords, long forwardFilledRecords,
-                             long anomalyCorrectedRecords, long anomalyFlaggedRecords,
-                             LocalDateTime transformedAt) {
-        this.symbolsProcessed = symbolsProcessed;
-        this.calendarDays = calendarDays;
-        this.totalRecords = totalRecords;
-        this.cleanRecords = cleanRecords;
-        this.forwardFilledRecords = forwardFilledRecords;
-        this.anomalyCorrectedRecords = anomalyCorrectedRecords;
-        this.anomalyFlaggedRecords = anomalyFlaggedRecords;
-        this.transformedAt = transformedAt;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private int symbolsProcessed;
+        private int calendarDays;
+        private long totalRecords;
+        private long cleanRecords;
+        private long forwardFilledRecords;
+        private long anomalyCorrectedRecords;
+        private long anomalyFlaggedRecords;
+        private LocalDateTime transformedAt;
+
+        public Builder symbolsProcessed(int val) { this.symbolsProcessed = val; return this; }
+        public Builder calendarDays(int val) { this.calendarDays = val; return this; }
+        public Builder totalRecords(long val) { this.totalRecords = val; return this; }
+        public Builder cleanRecords(long val) { this.cleanRecords = val; return this; }
+        public Builder forwardFilledRecords(long val) { this.forwardFilledRecords = val; return this; }
+        public Builder anomalyCorrectedRecords(long val) { this.anomalyCorrectedRecords = val; return this; }
+        public Builder anomalyFlaggedRecords(long val) { this.anomalyFlaggedRecords = val; return this; }
+        public Builder transformedAt(LocalDateTime val) { this.transformedAt = val; return this; }
+
+        public TransformSummary build() {
+            TransformSummary s = new TransformSummary();
+            s.symbolsProcessed = this.symbolsProcessed;
+            s.calendarDays = this.calendarDays;
+            s.totalRecords = this.totalRecords;
+            s.cleanRecords = this.cleanRecords;
+            s.forwardFilledRecords = this.forwardFilledRecords;
+            s.anomalyCorrectedRecords = this.anomalyCorrectedRecords;
+            s.anomalyFlaggedRecords = this.anomalyFlaggedRecords;
+            s.transformedAt = this.transformedAt;
+            return s;
+        }
     }
 
     public int getSymbolsProcessed() { return symbolsProcessed; }

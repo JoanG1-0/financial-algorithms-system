@@ -33,10 +33,16 @@ class TransformControllerTest {
 
     @Test
     void postTransform_returns202WithSummary() throws Exception {
-        TransformSummary summary = new TransformSummary(
-                5, 100, 500L, 480L, 15L, 3L, 2L,
-                LocalDateTime.of(2024, 1, 10, 12, 0)
-        );
+        TransformSummary summary = TransformSummary.builder()
+                .symbolsProcessed(5)
+                .calendarDays(100)
+                .totalRecords(500L)
+                .cleanRecords(480L)
+                .forwardFilledRecords(15L)
+                .anomalyCorrectedRecords(3L)
+                .anomalyFlaggedRecords(2L)
+                .transformedAt(LocalDateTime.of(2024, 1, 10, 12, 0))
+                .build();
         when(transformService.transformAll()).thenReturn(summary);
 
         mockMvc.perform(post("/api/etl/transform")

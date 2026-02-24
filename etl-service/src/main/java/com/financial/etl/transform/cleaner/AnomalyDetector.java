@@ -38,17 +38,35 @@ public class AnomalyDetector {
             return records;
         }
 
-        // Pass 1: collect log-returns from non-forward-filled consecutive pairs
+        double[] stats = collectReturnStats(records);
+        int count = (int) stats[2];
+        if (count < 2) {
+            return records;
+        }
+
+        double mean = stats[0] / count;
+        double variance = (stats[1] / count) - (mean * mean);
+        double stdDev = Math.sqrt(Math.max(variance, 0.0));
+
+        if (stdDev == 0.0) {
+            return records;
+        }
+
+        flagExtremeReturns(records, mean, stdDev);
+        return records;
+    }
+
+    // Pass 1: collect log-returns from non-forward-filled consecutive pairs
+    // Returns [sumR, sumR2, count]
+    private double[] collectReturnStats(List<CleanedRecord> records) {
         double sumR = 0.0;
         double sumR2 = 0.0;
         int count = 0;
-
         BigDecimal prevClose = null;
         boolean prevWasReal = false;
 
         for (CleanedRecord cr : records) {
             boolean isReal = cr.getDataQuality() != DataQuality.FORWARD_FILLED;
-
             if (prevClose != null && prevWasReal && isReal && cr.getClose() != null) {
                 double logReturn = computeLogReturn(prevClose, cr.getClose());
                 if (Double.isFinite(logReturn)) {
@@ -57,54 +75,48 @@ public class AnomalyDetector {
                     count++;
                 }
             }
-
             if (isReal && cr.getClose() != null) {
                 prevClose = cr.getClose();
                 prevWasReal = true;
             } else if (!isReal) {
-                // forward-filled: don't update prevClose for return computation
                 prevWasReal = false;
             }
         }
 
-        if (count < 2) {
-            return records;
-        }
+        return new double[]{sumR, sumR2, count};
+    }
 
-        double mean = sumR / count;
-        double variance = (sumR2 / count) - (mean * mean);
-        double stdDev = Math.sqrt(Math.max(variance, 0.0));
-
-        if (stdDev == 0.0) {
-            return records;
-        }
-
-        // Pass 2: flag extreme returns
+    // Pass 2: flag records whose z-score exceeds the threshold
+    private void flagExtremeReturns(List<CleanedRecord> records, double mean, double stdDev) {
         BigDecimal lastRealClose = null;
-
         for (CleanedRecord cr : records) {
             boolean isReal = cr.getDataQuality() != DataQuality.FORWARD_FILLED;
-
             if (lastRealClose != null && cr.getClose() != null) {
-                double logReturn = computeLogReturn(lastRealClose, cr.getClose());
-                if (Double.isFinite(logReturn)) {
-                    double zScore = (logReturn - mean) / stdDev;
-                    if (Math.abs(zScore) > Z_THRESHOLD) {
-                        DataQuality quality = cr.getDataQuality();
-                        if (quality == DataQuality.CLEAN || quality == DataQuality.ANOMALY_CORRECTED) {
-                            cr.setDataQuality(DataQuality.ANOMALY_FLAGGED);
-                            cr.setAnomalyType(EXTREME_RETURN);
-                        }
-                    }
-                }
+                applyZScoreFlag(cr, lastRealClose, mean, stdDev);
             }
-
             if (isReal && cr.getClose() != null) {
                 lastRealClose = cr.getClose();
             }
         }
+    }
 
-        return records;
+    private void applyZScoreFlag(CleanedRecord cr, BigDecimal lastRealClose, double mean, double stdDev) {
+        double logReturn = computeLogReturn(lastRealClose, cr.getClose());
+        if (!Double.isFinite(logReturn)) {
+            return;
+        }
+        double zScore = (logReturn - mean) / stdDev;
+        if (Math.abs(zScore) <= Z_THRESHOLD) {
+            return;
+        }
+        if (isEligibleForFlagging(cr.getDataQuality())) {
+            cr.setDataQuality(DataQuality.ANOMALY_FLAGGED);
+            cr.setAnomalyType(EXTREME_RETURN);
+        }
+    }
+
+    private boolean isEligibleForFlagging(DataQuality quality) {
+        return quality == DataQuality.CLEAN || quality == DataQuality.ANOMALY_CORRECTED;
     }
 
     private double computeLogReturn(BigDecimal prevClose, BigDecimal currClose) {

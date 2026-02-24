@@ -90,17 +90,7 @@ public class MissingValueCleaner {
     }
 
     private CleanedRecord backwardFill(String symbol, LocalDate date, CleanedRecord source) {
-        CleanedRecord cr = new CleanedRecord();
-        cr.setSymbol(symbol);
-        cr.setDate(date);
-        cr.setOpen(source.getOpen());
-        cr.setHigh(source.getHigh());
-        cr.setLow(source.getLow());
-        cr.setClose(source.getClose());
-        cr.setVolume(source.getVolume());
-        cr.setDataQuality(DataQuality.FORWARD_FILLED);
-        cr.setTransformedAt(LocalDateTime.now());
-        return cr;
+        return forwardFill(symbol, date, source);
     }
 
     private CleanedRecord findFirstFuture(TreeMap<LocalDate, CleanedRecord> byDate, LocalDate date) {

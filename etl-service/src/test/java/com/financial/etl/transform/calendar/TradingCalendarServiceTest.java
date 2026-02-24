@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.NavigableSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +30,7 @@ class TradingCalendarServiceTest {
                 LocalDate.of(2024, 1, 8)
         );
 
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(series));
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(series));
 
         assertThat(calendar).containsExactly(LocalDate.of(2024, 1, 8));
     }
@@ -44,7 +44,7 @@ class TradingCalendarServiceTest {
         FinancialSeries s1 = seriesWithDates(day1, day2);
         FinancialSeries s2 = seriesWithDates(day2, day3);
 
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s1, s2));
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s1, s2));
 
         assertThat(calendar).containsExactly(day1, day2, day3);
     }
@@ -55,14 +55,14 @@ class TradingCalendarServiceTest {
         FinancialSeries s1 = seriesWithDates(day);
         FinancialSeries s2 = seriesWithDates(day);
 
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s1, s2));
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s1, s2));
 
         assertThat(calendar).hasSize(1);
     }
 
     @Test
     void buildUnifiedCalendar_emptySeriesListReturnsEmptySet() {
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of());
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of());
         assertThat(calendar).isEmpty();
     }
 
@@ -71,7 +71,7 @@ class TradingCalendarServiceTest {
         FinancialSeries empty = new FinancialSeries();
         empty.setSymbol("EMPTY");
 
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(empty));
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(empty));
         assertThat(calendar).isEmpty();
     }
 
@@ -82,7 +82,7 @@ class TradingCalendarServiceTest {
         LocalDate d3 = LocalDate.of(2024, 1, 4);
 
         FinancialSeries s = seriesWithDates(d3, d1, d2);
-        TreeSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s));
+        NavigableSet<LocalDate> calendar = service.buildUnifiedCalendar(List.of(s));
 
         assertThat(calendar).containsExactly(d1, d2, d3);
     }
