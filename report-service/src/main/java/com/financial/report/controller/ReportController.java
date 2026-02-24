@@ -1,7 +1,10 @@
 package com.financial.report.controller;
 
 import com.financial.report.entity.CorrelationEntry;
+import com.financial.report.service.PdfReportService;
 import com.financial.report.service.ReportService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +17,7 @@ import java.util.List;
  *   <tr><th>Método</th><th>Endpoint</th><th>Descripción</th><th>Status</th></tr>
  *   <tr><td>POST</td><td>/api/v1/reports/correlation-matrix/generate</td><td>Genera la matriz de correlación</td><td>202</td></tr>
  *   <tr><td>GET</td><td>/api/v1/reports/correlation-matrix</td><td>Consulta la matriz persistida</td><td>200</td></tr>
+ *   <tr><td>GET</td><td>/api/v1/reports/export/pdf</td><td>Exporta reporte completo en PDF</td><td>200</td></tr>
  * </table>
  */
 @RestController
@@ -21,9 +25,11 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+    private final PdfReportService pdfReportService;
 
-    public ReportController(ReportService reportService) {
+    public ReportController(ReportService reportService, PdfReportService pdfReportService) {
         this.reportService = reportService;
+        this.pdfReportService = pdfReportService;
     }
 
     /**
@@ -45,5 +51,19 @@ public class ReportController {
     @GetMapping("/correlation-matrix")
     public ResponseEntity<List<CorrelationEntry>> correlationMatrix() {
         return ResponseEntity.ok(reportService.getCorrelationMatrix());
+    }
+
+    /**
+     * Genera y descarga el reporte PDF completo con todos los hallazgos del sistema.
+     *
+     * @return 200 OK con el PDF como attachment
+     */
+    @GetMapping("/export/pdf")
+    public ResponseEntity<byte[]> exportPdf() {
+        byte[] pdf = pdfReportService.generatePdf();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=financial-report.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

@@ -67,6 +67,16 @@ public class AlgorithmController {
     }
 
     /**
+     * Devuelve todos los patrones detectados sin filtro de símbolo.
+     *
+     * @return 200 OK con lista de {@link PatternRecord}
+     */
+    @GetMapping("/patterns")
+    public ResponseEntity<List<PatternRecord>> allPatterns() {
+        return ResponseEntity.ok(algorithmService.getAllPatterns());
+    }
+
+    /**
      * Devuelve los patrones detectados para un activo concreto.
      *
      * @param symbol ticker del activo (e.g. "AAPL")

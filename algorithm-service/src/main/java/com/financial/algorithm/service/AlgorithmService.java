@@ -151,6 +151,11 @@ public class AlgorithmService {
         return patternRepository.findBySymbol(symbol);
     }
 
+    /** Devuelve todos los patrones persistidos sin filtro de símbolo. */
+    public List<PatternRecord> getAllPatterns() {
+        return patternRepository.findAll();
+    }
+
     /** Devuelve el registro SMA más reciente para un símbolo y ventana. */
     public SmaRecord getSma(String symbol, int window) {
         return smaRepository.findTopBySymbolAndWindowOrderByComputedAtDesc(symbol, window)
