@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Generador de reportes PDF con todos los hallazgos del sistema financiero.
@@ -169,7 +168,7 @@ public class PdfReportGenerator {
             List<SimilarityResponse> top10 = similarities.stream()
                     .sorted(Comparator.comparingDouble(SimilarityResponse::getPearson).reversed())
                     .limit(10)
-                    .collect(Collectors.toList());
+                    .toList();
 
             boolean alt = false;
             for (SimilarityResponse s : top10) {
