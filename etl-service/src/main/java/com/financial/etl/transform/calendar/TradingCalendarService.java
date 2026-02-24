@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 /**
@@ -27,12 +28,12 @@ public class TradingCalendarService {
      * @param allSeries all financial series with their price records loaded
      * @return NavigableSet of dates (ascending), excluding weekends
      */
-    public TreeSet<LocalDate> buildUnifiedCalendar(List<FinancialSeries> allSeries) {
+    public NavigableSet<LocalDate> buildUnifiedCalendar(List<FinancialSeries> allSeries) {
         TreeSet<LocalDate> calendar = new TreeSet<>();
 
         for (FinancialSeries series : allSeries) {
-            for (PriceRecord record : series.getPriceRecords()) {
-                LocalDate date = record.getDatetime();
+            for (PriceRecord price : series.getPriceRecords()) {
+                LocalDate date = price.getDatetime();
                 if (date != null && isNotWeekend(date)) {
                     calendar.add(date);
                 }

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.NavigableSet;
 
 /**
  * Orchestrates the full data transformation pipeline.
@@ -62,7 +62,7 @@ public class DataTransformService {
         List<FinancialSeries> allSeries = seriesRepository.findAllWithPriceRecords();
 
         // Step 1: Build unified trading calendar
-        TreeSet<LocalDate> calendar = calendarService.buildUnifiedCalendar(allSeries);
+        NavigableSet<LocalDate> calendar = calendarService.buildUnifiedCalendar(allSeries);
 
         // Step 2: Process each symbol
         List<CleanedRecord> allCleanedRecords = new ArrayList<>();
@@ -100,8 +100,16 @@ public class DataTransformService {
         long corrected = count(records, DataQuality.ANOMALY_CORRECTED);
         long flagged = count(records, DataQuality.ANOMALY_FLAGGED);
 
-        return new TransformSummary(symbolCount, calendarDays, total,
-                clean, filled, corrected, flagged, LocalDateTime.now());
+        return TransformSummary.builder()
+                .symbolsProcessed(symbolCount)
+                .calendarDays(calendarDays)
+                .totalRecords(total)
+                .cleanRecords(clean)
+                .forwardFilledRecords(filled)
+                .anomalyCorrectedRecords(corrected)
+                .anomalyFlaggedRecords(flagged)
+                .transformedAt(LocalDateTime.now())
+                .build();
     }
 
     private long count(List<CleanedRecord> records, DataQuality quality) {

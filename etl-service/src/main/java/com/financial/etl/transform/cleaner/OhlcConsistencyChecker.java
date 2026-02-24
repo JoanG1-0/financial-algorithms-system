@@ -99,15 +99,11 @@ public class OhlcConsistencyChecker {
         BigDecimal low = pr.getLow();
         BigDecimal high = pr.getHigh();
 
-        if (pr.getOpen() != null) {
-            if (pr.getOpen().compareTo(low) < 0 || pr.getOpen().compareTo(high) > 0) {
-                return true;
-            }
+        if (pr.getOpen() != null && (pr.getOpen().compareTo(low) < 0 || pr.getOpen().compareTo(high) > 0)) {
+            return true;
         }
-        if (pr.getClose() != null) {
-            if (pr.getClose().compareTo(low) < 0 || pr.getClose().compareTo(high) > 0) {
-                return true;
-            }
+        if (pr.getClose() != null && (pr.getClose().compareTo(low) < 0 || pr.getClose().compareTo(high) > 0)) {
+            return true;
         }
         return false;
     }
