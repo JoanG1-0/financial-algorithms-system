@@ -23,7 +23,25 @@ public class SlidingWindow {
      * @param startIndex índice de inicio en la serie original
      * @param values     valores de la ventana (copia)
      */
-    public record WindowSlice(int startIndex, double[] values) {}
+    public record WindowSlice(int startIndex, double[] values) {
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof WindowSlice other)) return false;
+            return startIndex == other.startIndex && Arrays.equals(values, other.values);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Integer.hashCode(startIndex) + Arrays.hashCode(values);
+        }
+
+        @Override
+        public String toString() {
+            return "WindowSlice[startIndex=" + startIndex + ", values=" + Arrays.toString(values) + "]";
+        }
+    }
 
     /**
      * Extrae todas las sub-ventanas de tamaño {@code k} de {@code series}.

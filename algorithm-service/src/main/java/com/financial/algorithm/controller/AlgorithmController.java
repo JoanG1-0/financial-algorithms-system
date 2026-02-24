@@ -91,10 +91,10 @@ public class AlgorithmController {
     @GetMapping("/indicators/{symbol}/sma")
     public ResponseEntity<SmaRecord> sma(@PathVariable("symbol") String symbol,
                                           @RequestParam(name = "window", defaultValue = "20") int window) {
-        SmaRecord record = algorithmService.getSma(symbol, window);
-        if (record == null) {
+        SmaRecord sma = algorithmService.getSma(symbol, window);
+        if (sma == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(record);
+        return ResponseEntity.ok(sma);
     }
 }
