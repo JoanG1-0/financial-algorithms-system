@@ -3,7 +3,6 @@ package com.financial.algorithm.service;
 import com.financial.algorithm.client.EtlServiceClient;
 import com.financial.algorithm.dto.PatternResult;
 import com.financial.algorithm.dto.RiskProfile;
-import com.financial.algorithm.dto.SimilarityResult;
 import com.financial.algorithm.entity.PatternRecord;
 import com.financial.algorithm.entity.RiskRecord;
 import com.financial.algorithm.entity.SimilarityRecord;

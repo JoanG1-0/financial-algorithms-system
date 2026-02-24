@@ -15,7 +15,9 @@ public class SimilarityResponse {
     private double cosine;
     private LocalDateTime computedAt;
 
-    public SimilarityResponse() {}
+    public SimilarityResponse() {
+        // Required for JSON deserialization: Jackson needs a public no-arg constructor to instantiate DTOs via reflection.
+    }
 
     public String getTickerA() { return tickerA; }
     public void setTickerA(String tickerA) { this.tickerA = tickerA; }
