@@ -64,7 +64,7 @@ public class AlgorithmService {
     private final PatternRepository patternRepository;
     private final SmaRepository smaRepository;
 
-    @Value("${algorithm.sma.window:" + DEFAULT_SMA_WINDOW + "}")
+    @Value("${algorithm.sma.window:20}")
     private int smaWindow;
 
     public AlgorithmService(EtlServiceClient etlServiceClient,
