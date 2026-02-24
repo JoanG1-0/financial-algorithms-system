@@ -20,15 +20,16 @@ import java.util.Map;
 @Component
 public class EtlServiceClient {
 
-    private static final String CLEANED_PRICES_PATH = "/api/etl/transform/cleaned-prices";
-
     private final RestTemplate restTemplate;
     private final String etlBaseUrl;
+    private final String cleanedPricesPath;
 
     public EtlServiceClient(RestTemplate restTemplate,
-                            @Value("${etl.service.url}") String etlBaseUrl) {
+                            @Value("${etl.service.url}") String etlBaseUrl,
+                            @Value("${etl.service.cleaned-prices-path}") String cleanedPricesPath) {
         this.restTemplate = restTemplate;
         this.etlBaseUrl = etlBaseUrl;
+        this.cleanedPricesPath = cleanedPricesPath;
     }
 
     /**
@@ -37,7 +38,7 @@ public class EtlServiceClient {
      * @return mapa de ticker → array de precios de cierre en orden cronológico
      */
     public Map<String, double[]> fetchCleanedPrices() {
-        String url = etlBaseUrl + CLEANED_PRICES_PATH;
+        String url = etlBaseUrl + cleanedPricesPath;
         return restTemplate.exchange(
                 url,
                 HttpMethod.GET,

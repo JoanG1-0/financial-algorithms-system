@@ -29,7 +29,9 @@ public class SmaRecord {
     @Column(nullable = false)
     private LocalDateTime computedAt;
 
-    public SmaRecord() {}
+    public SmaRecord() {
+        // Required by JPA: Hibernate needs a public no-arg constructor to instantiate entities via reflection.
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

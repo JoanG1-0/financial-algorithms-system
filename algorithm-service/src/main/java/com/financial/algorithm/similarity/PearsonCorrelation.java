@@ -35,7 +35,9 @@ public class PearsonCorrelation {
             throw new IllegalArgumentException("Las series no pueden estar vacías");
         }
 
-        double sumX = 0.0, sumY = 0.0;
+        double sumX = 0.0;
+        double sumY = 0.0;
+        
         for (int i = 0; i < x.length; i++) {
             sumX += x[i];
             sumY += y[i];
