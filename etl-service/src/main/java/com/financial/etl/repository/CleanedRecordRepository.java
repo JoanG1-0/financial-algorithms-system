@@ -11,6 +11,10 @@ public interface CleanedRecordRepository extends JpaRepository<CleanedRecord, Lo
     @Query("SELECT c.dataQuality AS quality, COUNT(c) AS total FROM CleanedRecord c GROUP BY c.dataQuality")
     List<QualityCount> countByDataQuality();
 
+    @Query("SELECT c FROM CleanedRecord c WHERE c.dataQuality IN (:qualities) ORDER BY c.symbol ASC, c.date ASC")
+    List<CleanedRecord> findByDataQualityInOrderBySymbolAndDate(
+            @org.springframework.data.repository.query.Param("qualities") List<DataQuality> qualities);
+
     interface QualityCount {
         DataQuality getQuality();
         Long getTotal();
