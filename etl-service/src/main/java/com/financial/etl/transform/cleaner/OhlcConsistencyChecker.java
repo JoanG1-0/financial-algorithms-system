@@ -102,9 +102,6 @@ public class OhlcConsistencyChecker {
         if (pr.getOpen() != null && (pr.getOpen().compareTo(low) < 0 || pr.getOpen().compareTo(high) > 0)) {
             return true;
         }
-        if (pr.getClose() != null && (pr.getClose().compareTo(low) < 0 || pr.getClose().compareTo(high) > 0)) {
-            return true;
-        }
-        return false;
+        return pr.getClose() != null && (pr.getClose().compareTo(low) < 0 || pr.getClose().compareTo(high) > 0);
     }
 }
