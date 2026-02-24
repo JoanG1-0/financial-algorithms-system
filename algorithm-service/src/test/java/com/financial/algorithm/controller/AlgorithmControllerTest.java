@@ -115,4 +115,19 @@ class AlgorithmControllerTest {
         mockMvc.perform(get("/api/algorithm/indicators/UNKNOWN/sma"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void allPatterns_returns200WithList() throws Exception {
+        PatternRecord rec = new PatternRecord();
+        rec.setSymbol("AAPL");
+        rec.setPatternType("CONSECUTIVE_UP");
+        rec.setOccurrences(5);
+        rec.setComputedAt(LocalDateTime.now());
+        when(algorithmService.getAllPatterns()).thenReturn(List.of(rec));
+
+        mockMvc.perform(get("/api/algorithm/patterns"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"))
+                .andExpect(jsonPath("$[0].patternType").value("CONSECUTIVE_UP"));
+    }
 }
