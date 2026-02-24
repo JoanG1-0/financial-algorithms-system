@@ -115,6 +115,30 @@ services:
       etl-service:
         condition: service_started
 
+  # ---------------------------------------------------------------------------
+  # Report Service - Reportes financieros (US-20)
+  # ---------------------------------------------------------------------------
+  report-service:
+    build:
+      context: .
+      dockerfile: report-service/Dockerfile
+    container_name: financial-report
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/report_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      ALGORITHM_SERVICE_URL: http://algorithm-service:8083
+    networks:
+      - financial-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      algorithm-service:
+        condition: service_started
+
 # =============================================================================
 # Volúmenes persistentes - Los datos sobreviven a reinicios
 # =============================================================================
