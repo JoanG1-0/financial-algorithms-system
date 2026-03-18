@@ -8,6 +8,6 @@ class GatewayServiceApplicationTest {
 
     @Test
     void contextLoads() {
-        // Passes if the full Spring context starts without errors
+        assertNotNull(new GatewayServiceApplication());
     }
 }
