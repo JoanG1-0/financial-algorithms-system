@@ -53,11 +53,11 @@ class BatchControllerTest {
     }
 
     @Test
-    void getStatus_returns204_whenNoBatchToday() throws Exception {
+    void getStatus_returns404_whenNoBatchExists() throws Exception {
         when(batchDownloadService.getLastBatchStatus()).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/etl/batch/status"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test

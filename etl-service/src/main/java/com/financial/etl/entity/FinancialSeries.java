@@ -1,5 +1,6 @@
 package com.financial.etl.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,6 +51,7 @@ public class FinancialSeries {
     @Column(name = "batch_id")
     private Long batchId;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "series", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PriceRecord> priceRecords = new ArrayList<>();
 

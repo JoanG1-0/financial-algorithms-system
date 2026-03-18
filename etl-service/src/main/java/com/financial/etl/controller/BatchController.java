@@ -22,7 +22,7 @@ public class BatchController {
     public ResponseEntity<BatchDownloadLog> getStatus() {
         return batchDownloadService.getLastBatchStatus()
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/trigger")
