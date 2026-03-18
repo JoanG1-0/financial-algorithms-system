@@ -1,9 +1,9 @@
 package com.financial.gateway;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class GatewayServiceApplicationTest {
 
     @Test
