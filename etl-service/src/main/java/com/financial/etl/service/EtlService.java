@@ -7,7 +7,6 @@ import com.financial.etl.dto.TimeSeriesMeta;
 import com.financial.etl.dto.TimeSeriesResponse;
 import com.financial.etl.dto.TimeSeriesValue;
 import com.financial.etl.entity.FinancialSeries;
-import com.financial.etl.entity.PriceRecord;
 import com.financial.etl.exception.DataDownloadException;
 import com.financial.etl.exception.JsonParsingException;
 import com.financial.etl.entity.CleanedRecord;
