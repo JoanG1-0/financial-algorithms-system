@@ -1,6 +1,6 @@
 # =============================================================================
 # Infraestructura + Servicios
-# Levanta: PostgreSQL, Jenkins, SonarQube, ETL Service, Algorithm Service
+# Levanta: PostgreSQL, Jenkins, SonarQube, ETL Service, Algorithm Service, Report Service, Gateway Service
 # Comando: docker-compose up -d
 # =============================================================================
 
@@ -137,6 +137,30 @@ services:
       postgres:
         condition: service_healthy
       algorithm-service:
+        condition: service_started
+
+  # ---------------------------------------------------------------------------
+  # Gateway Service - Punto de entrada único (puerto 8081)
+  # ---------------------------------------------------------------------------
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: financial-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      ETL_SERVICE_URL: http://etl-service:8082
+      ALGORITHM_SERVICE_URL: http://algorithm-service:8083
+      REPORT_SERVICE_URL: http://report-service:8084
+    networks:
+      - financial-network
+    depends_on:
+      etl-service:
+        condition: service_started
+      algorithm-service:
+        condition: service_started
+      report-service:
         condition: service_started
 
 # =============================================================================
