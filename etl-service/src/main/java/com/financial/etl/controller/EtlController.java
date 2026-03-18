@@ -1,7 +1,11 @@
 package com.financial.etl.controller;
 
+import com.financial.etl.entity.CleanedRecord;
 import com.financial.etl.entity.FinancialSeries;
+import com.financial.etl.entity.PriceRecord;
 import com.financial.etl.service.EtlService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +36,26 @@ public class EtlController {
     @GetMapping("/series/{symbol}")
     public ResponseEntity<List<FinancialSeries>> getSeries(@PathVariable("symbol") String symbol) {
         return ResponseEntity.ok(etlService.findBySymbol(symbol));
+    }
+
+    @GetMapping("/assets")
+    public ResponseEntity<List<FinancialSeries>> getAllAssets() {
+        return ResponseEntity.ok(etlService.findAllAssets());
+    }
+
+    @GetMapping("/series/{symbol}/prices")
+    public ResponseEntity<Page<PriceRecord>> getPrices(
+            @PathVariable("symbol") String symbol,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "30") int size) {
+        return ResponseEntity.ok(etlService.findPricesBySymbol(symbol, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/series/{symbol}/cleaned")
+    public ResponseEntity<Page<CleanedRecord>> getCleaned(
+            @PathVariable("symbol") String symbol,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "30") int size) {
+        return ResponseEntity.ok(etlService.findCleanedBySymbol(symbol, PageRequest.of(page, size)));
     }
 }

@@ -1,5 +1,6 @@
 package com.financial.algorithm.controller;
 
+import com.financial.algorithm.dto.DashboardSummary;
 import com.financial.algorithm.entity.PatternRecord;
 import com.financial.algorithm.entity.RiskRecord;
 import com.financial.algorithm.entity.SimilarityRecord;
@@ -106,5 +107,10 @@ public class AlgorithmController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(sma);
+    }
+
+    @GetMapping("/dashboard-summary")
+    public ResponseEntity<DashboardSummary> dashboardSummary() {
+        return ResponseEntity.ok(algorithmService.getDashboardSummary());
     }
 }

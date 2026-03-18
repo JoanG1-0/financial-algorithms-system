@@ -1,6 +1,7 @@
 package com.financial.algorithm.service;
 
 import com.financial.algorithm.client.EtlServiceClient;
+import com.financial.algorithm.dto.DashboardSummary;
 import com.financial.algorithm.dto.PatternResult;
 import com.financial.algorithm.dto.RiskProfile;
 import com.financial.algorithm.entity.PatternRecord;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -160,6 +162,26 @@ public class AlgorithmService {
     public SmaRecord getSma(String symbol, int window) {
         return smaRepository.findTopBySymbolAndWindowOrderByComputedAtDesc(symbol, window)
                 .orElse(null);
+    }
+
+    /** Devuelve un resumen consolidado para el dashboard del frontend. */
+    public DashboardSummary getDashboardSummary() {
+        long totalSimilarityPairs = similarityRepository.count();
+        LocalDateTime lastAnalysisAt = riskRepository.findTopByOrderByComputedAtDesc()
+                .map(RiskRecord::getComputedAt)
+                .orElse(null);
+
+        Map<String, Long> riskDistribution = new LinkedHashMap<>();
+        for (RiskRepository.CategoryCount cc : riskRepository.countByCategory()) {
+            riskDistribution.put(cc.getCategory(), cc.getTotal());
+        }
+
+        RiskRecord topRisk = riskRepository.findTopByOrderByAnnualizedVolatilityDesc().orElse(null);
+        RiskRecord lowestRisk = riskRepository.findTopByOrderByAnnualizedVolatilityAsc().orElse(null);
+        int totalAssets = (int) riskRepository.count();
+
+        return new DashboardSummary(totalAssets, totalSimilarityPairs, lastAnalysisAt,
+                riskDistribution, topRisk, lowestRisk);
     }
 
     // -------------------------------------------------------------------------
