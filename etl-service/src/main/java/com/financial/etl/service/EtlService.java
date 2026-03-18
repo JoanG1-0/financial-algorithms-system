@@ -10,7 +10,13 @@ import com.financial.etl.entity.FinancialSeries;
 import com.financial.etl.entity.PriceRecord;
 import com.financial.etl.exception.DataDownloadException;
 import com.financial.etl.exception.JsonParsingException;
+import com.financial.etl.entity.CleanedRecord;
+import com.financial.etl.entity.PriceRecord;
+import com.financial.etl.repository.CleanedRecordRepository;
 import com.financial.etl.repository.FinancialSeriesRepository;
+import com.financial.etl.repository.PriceRecordRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +30,19 @@ public class EtlService {
     private final TwelveDataHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final FinancialSeriesRepository repository;
+    private final PriceRecordRepository priceRecordRepository;
+    private final CleanedRecordRepository cleanedRecordRepository;
 
     public EtlService(TwelveDataHttpClient httpClient,
                       ObjectMapper objectMapper,
-                      FinancialSeriesRepository repository) {
+                      FinancialSeriesRepository repository,
+                      PriceRecordRepository priceRecordRepository,
+                      CleanedRecordRepository cleanedRecordRepository) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.repository = repository;
+        this.priceRecordRepository = priceRecordRepository;
+        this.cleanedRecordRepository = cleanedRecordRepository;
     }
 
     @Transactional
@@ -88,5 +100,20 @@ public class EtlService {
     @Transactional(readOnly = true)
     public List<FinancialSeries> findBySymbol(String symbol) {
         return repository.findBySymbol(symbol);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FinancialSeries> findAllAssets() {
+        return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PriceRecord> findPricesBySymbol(String symbol, Pageable pageable) {
+        return priceRecordRepository.findBySeriesSymbolOrderByDatetimeDesc(symbol, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CleanedRecord> findCleanedBySymbol(String symbol, Pageable pageable) {
+        return cleanedRecordRepository.findBySymbolOrderByDateDesc(symbol, pageable);
     }
 }

@@ -1,5 +1,6 @@
 package com.financial.algorithm.controller;
 
+import com.financial.algorithm.dto.DashboardSummary;
 import com.financial.algorithm.entity.PatternRecord;
 import com.financial.algorithm.entity.RiskRecord;
 import com.financial.algorithm.entity.SimilarityRecord;
@@ -129,5 +130,34 @@ class AlgorithmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].symbol").value("AAPL"))
                 .andExpect(jsonPath("$[0].patternType").value("CONSECUTIVE_UP"));
+    }
+
+    @Test
+    void dashboardSummary_returns200WithSummary() throws Exception {
+        RiskRecord top = new RiskRecord();
+        top.setTicker("TSLA");
+        top.setAnnualizedVolatility(0.58);
+        top.setCategory("AGGRESSIVE");
+        top.setComputedAt(LocalDateTime.now());
+
+        RiskRecord low = new RiskRecord();
+        low.setTicker("KO");
+        low.setAnnualizedVolatility(0.18);
+        low.setCategory("CONSERVATIVE");
+        low.setComputedAt(LocalDateTime.now());
+
+        DashboardSummary summary = new DashboardSummary(
+                20, 190L, LocalDateTime.now(),
+                java.util.Map.of("CONSERVATIVE", 7L, "MODERATE", 9L, "AGGRESSIVE", 4L),
+                top, low
+        );
+        when(algorithmService.getDashboardSummary()).thenReturn(summary);
+
+        mockMvc.perform(get("/api/algorithm/dashboard-summary"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalAssets").value(20))
+                .andExpect(jsonPath("$.totalSimilarityPairs").value(190))
+                .andExpect(jsonPath("$.topRiskAsset.ticker").value("TSLA"))
+                .andExpect(jsonPath("$.lowestRiskAsset.ticker").value("KO"));
     }
 }
