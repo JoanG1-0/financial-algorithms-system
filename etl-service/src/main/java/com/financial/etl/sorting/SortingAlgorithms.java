@@ -71,7 +71,9 @@ public final class SortingAlgorithms {
                                   Comparator<CleanedRecord> cmp) {
         CleanedRecord[] left  = Arrays.copyOfRange(a, l, m + 1);
         CleanedRecord[] right = Arrays.copyOfRange(a, m + 1, r + 1);
-        int i = 0, j = 0, k = l;
+        int i = 0;
+        int j = 0;
+        int k = l;
         while (i < left.length && j < right.length)
             a[k++] = cmp.compare(left[i], right[j]) <= 0 ? left[i++] : right[j++];
         while (i < left.length)  a[k++] = left[i++];
@@ -95,7 +97,8 @@ public final class SortingAlgorithms {
     // -------------------------------------------------------------------------
 
     public static void combSort(CleanedRecord[] a, Comparator<CleanedRecord> cmp) {
-        int n = a.length, gap = n;
+        int n = a.length;
+        int gap = n;
         boolean sorted = false;
         while (!sorted) {
             gap = (int) (gap / 1.3);
@@ -137,13 +140,14 @@ public final class SortingAlgorithms {
                                       Comparator<CleanedRecord> cmp) {
         if (root == null) return new BSTNode(val);
         BSTNode curr = root;
-        while (true) {
+        boolean inserted = false;
+        while (!inserted) {
             if (cmp.compare(val, curr.val) < 0) {
-                if (curr.left  == null) { curr.left  = new BSTNode(val); break; }
-                curr = curr.left;
+                if (curr.left == null) { curr.left  = new BSTNode(val); inserted = true; }
+                else curr = curr.left;
             } else {
-                if (curr.right == null) { curr.right = new BSTNode(val); break; }
-                curr = curr.right;
+                if (curr.right == null) { curr.right = new BSTNode(val); inserted = true; }
+                else curr = curr.right;
             }
         }
         return root;
@@ -177,7 +181,8 @@ public final class SortingAlgorithms {
     public static void pigeonholeSort(CleanedRecord[] a, Comparator<CleanedRecord> cmp,
                                       ToLongFunction<CleanedRecord> keyFn) {
         if (a.length == 0) return;
-        long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
+        long min = Long.MAX_VALUE;
+        long max = Long.MIN_VALUE;
         for (CleanedRecord r : a) {
             long k = keyFn.applyAsLong(r);
             if (k < min) min = k;
@@ -189,7 +194,7 @@ public final class SortingAlgorithms {
         List<CleanedRecord>[] holeArr = new List[holes];
         for (int i = 0; i < holes; i++) holeArr[i] = new ArrayList<>();
         for (CleanedRecord r : a) {
-            int idx = (int) Math.min(holes - 1, ((keyFn.applyAsLong(r) - min) * holes) / range);
+            int idx = (int) Math.min((long)holes - 1, ((keyFn.applyAsLong(r) - min) * holes) / range);
             holeArr[idx].add(r);
         }
         int k = 0;
@@ -206,7 +211,8 @@ public final class SortingAlgorithms {
     public static void bucketSort(CleanedRecord[] a, Comparator<CleanedRecord> cmp,
                                   ToLongFunction<CleanedRecord> keyFn) {
         if (a.length == 0) return;
-        long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
+        long min = Long.MAX_VALUE; 
+        long max = Long.MIN_VALUE;
         for (CleanedRecord r : a) {
             long k = keyFn.applyAsLong(r);
             if (k < min) min = k;
@@ -218,7 +224,7 @@ public final class SortingAlgorithms {
         List<CleanedRecord>[] buckets = new List[bc];
         for (int i = 0; i < bc; i++) buckets[i] = new ArrayList<>();
         for (CleanedRecord r : a) {
-            int idx = (int) Math.min(bc - 1, ((keyFn.applyAsLong(r) - min) * bc) / rng);
+            int idx = (int) Math.min((long)bc - 1, ((keyFn.applyAsLong(r) - min) * bc) / rng);
             buckets[idx].add(r);
         }
         int k = 0;
@@ -240,7 +246,8 @@ public final class SortingAlgorithms {
         if (cmp.compare(a[mid], a[hi])  > 0) swap(a, mid, hi);
         swap(a, mid, hi - 1);
         CleanedRecord pivot = a[hi - 1];
-        int i = lo, j = hi - 1;
+        int i = lo;
+        int j = hi - 1;
         while (true) {
             while (cmp.compare(a[++i], pivot) < 0);
             while (cmp.compare(a[--j], pivot) > 0);
@@ -257,7 +264,8 @@ public final class SortingAlgorithms {
         stack.push(new int[]{0, a.length - 1});
         while (!stack.isEmpty()) {
             int[] r = stack.pop();
-            int lo = r[0], hi = r[1];
+            int lo = r[0];
+            int hi = r[1];
             if (hi - lo < 10) {
                 insertionSortRange(a, lo, hi, cmp);
             } else if (lo < hi) {
@@ -275,7 +283,9 @@ public final class SortingAlgorithms {
     private static void heapify(CleanedRecord[] a, int n, int i,
                                  Comparator<CleanedRecord> cmp) {
         while (true) {
-            int largest = i, l = 2 * i + 1, r = 2 * i + 2;
+            int largest = i;
+            int l = 2 * i + 1; 
+            int r = 2 * i + 2;
             if (l < n && cmp.compare(a[l], a[largest]) > 0) largest = l;
             if (r < n && cmp.compare(a[r], a[largest]) > 0) largest = r;
             if (largest == i) break;
@@ -336,7 +346,8 @@ public final class SortingAlgorithms {
     // -------------------------------------------------------------------------
 
     public static void gnomeSort(CleanedRecord[] a, Comparator<CleanedRecord> cmp) {
-        int i = 0, n = a.length;
+        int i = 0;
+        int n = a.length;
         while (i < n) {
             if (i == 0 || cmp.compare(a[i], a[i - 1]) >= 0) i++;
             else { swap(a, i, i - 1); i--; }
