@@ -128,7 +128,8 @@ public final class SortingAlgorithms {
 
     private static final class BSTNode {
         CleanedRecord val;
-        BSTNode left, right;
+        BSTNode left, 
+        BSTNode right;
         BSTNode(CleanedRecord v) { val = v; }
     }
 
