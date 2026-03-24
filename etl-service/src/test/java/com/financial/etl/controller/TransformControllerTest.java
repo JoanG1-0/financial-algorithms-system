@@ -85,4 +85,50 @@ class TransformControllerTest {
                 .andExpect(jsonPath("$.ANOMALY_CORRECTED").value(0))
                 .andExpect(jsonPath("$.ANOMALY_FLAGGED").value(0));
     }
+
+    @Test
+    void getMissingPerSymbol_returns200WithCountsPerSymbol() throws Exception {
+        CleanedRecordRepository.SymbolMissingCount smc =
+                new CleanedRecordRepository.SymbolMissingCount() {
+                    public String getSymbol() { return "AAPL"; }
+                    public Long getTotal()    { return 12L; }
+                };
+
+        when(cleanedRecordRepository.countForwardFilledPerSymbol()).thenReturn(List.of(smc));
+
+        mockMvc.perform(get("/api/etl/transform/missing-per-symbol"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.AAPL").value(12));
+    }
+
+    @Test
+    void getMissingPerSymbol_returnsEmptyMapWhenNoFilledRecords() throws Exception {
+        when(cleanedRecordRepository.countForwardFilledPerSymbol()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/etl/transform/missing-per-symbol"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getMissingPerSymbol_returnsMultipleSymbols() throws Exception {
+        CleanedRecordRepository.SymbolMissingCount smc1 =
+                new CleanedRecordRepository.SymbolMissingCount() {
+                    public String getSymbol() { return "AAPL"; }
+                    public Long getTotal()    { return 5L; }
+                };
+        CleanedRecordRepository.SymbolMissingCount smc2 =
+                new CleanedRecordRepository.SymbolMissingCount() {
+                    public String getSymbol() { return "MSFT"; }
+                    public Long getTotal()    { return 3L; }
+                };
+
+        when(cleanedRecordRepository.countForwardFilledPerSymbol())
+                .thenReturn(List.of(smc1, smc2));
+
+        mockMvc.perform(get("/api/etl/transform/missing-per-symbol"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.AAPL").value(5))
+                .andExpect(jsonPath("$.MSFT").value(3));
+    }
 }

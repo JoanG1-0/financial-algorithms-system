@@ -89,6 +89,57 @@ class SortingControllerTest {
     }
 
     // -----------------------------------------------------------------------
+    // GET /api/etl/sort/result
+    // -----------------------------------------------------------------------
+
+    @Test
+    void result_returns200WithSortedRecords() throws Exception {
+        when(benchmark.sortedSample("TimSort", "date", 20))
+                .thenReturn(List.of(sampleDto()));
+
+        mockMvc.perform(get("/api/etl/sort/result")
+                        .param("algorithm", "TimSort")
+                        .param("criterion", "date")
+                        .param("limit", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"))
+                .andExpect(jsonPath("$[0].volume").value(9000));
+    }
+
+    @Test
+    void result_usesDefaultCriterionAndLimit() throws Exception {
+        when(benchmark.sortedSample("HeapSort", "date", 20))
+                .thenReturn(List.of(sampleDto()));
+
+        mockMvc.perform(get("/api/etl/sort/result")
+                        .param("algorithm", "HeapSort"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void result_volumeCriterion_returns200() throws Exception {
+        when(benchmark.sortedSample("QuickSort", "volume", 10))
+                .thenReturn(List.of(sampleDto()));
+
+        mockMvc.perform(get("/api/etl/sort/result")
+                        .param("algorithm", "QuickSort")
+                        .param("criterion", "volume")
+                        .param("limit", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"));
+    }
+
+    @Test
+    void result_returnsEmptyListWhenNoData() throws Exception {
+        when(benchmark.sortedSample("TimSort", "date", 20)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/etl/sort/result")
+                        .param("algorithm", "TimSort"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    // -----------------------------------------------------------------------
     // Helper
     // -----------------------------------------------------------------------
 
