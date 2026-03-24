@@ -19,7 +19,7 @@ import java.util.function.ToLongFunction;
 @Service
 public class SortingBenchmark {
 
-    private static final int SUBSET_SIZE = 3_000;
+    private static final int DATASET_SIZE = 25_100;
 
     private static final Comparator<CleanedRecord> DATE_CLOSE_CMP = new ActivoComparator();
     private static final Comparator<CleanedRecord> VOLUME_CMP     = new VolumeComparator();
@@ -63,6 +63,65 @@ public class SortingBenchmark {
     }
 
     // -------------------------------------------------------------------------
+    // Resultado ordenado de un algoritmo específico
+    // -------------------------------------------------------------------------
+
+    /**
+     * Ejecuta el algoritmo indicado con el criterio dado y devuelve los primeros
+     * {@code limit} registros ordenados, permitiendo verificar el orden real.
+     *
+     * @param algorithm nombre exacto: TimSort, CombSort, SelectionSort, TreeSort,
+     *                  PigeonholeSort, BucketSort, QuickSort, HeapSort, BitonicSort,
+     *                  GnomeSort, BinaryInsertionSort, RadixSort
+     * @param criterion "date" (fecha ASC + close ASC) o "volume" (volumen ASC)
+     * @param limit     máximo de registros a devolver
+     */
+    public List<CleanedRecordDto> sortedSample(String algorithm, String criterion, int limit) {
+        CleanedRecord[] master = repository.findAll().toArray(new CleanedRecord[0]);
+        int n = Math.min(master.length, DATASET_SIZE);
+
+        Comparator<CleanedRecord> cmp;
+        ToLongFunction<CleanedRecord> keyFn;
+        if ("volume".equalsIgnoreCase(criterion)) {
+            cmp    = VOLUME_CMP;
+            keyFn  = VOL_KEY;
+        } else {
+            cmp    = DATE_CLOSE_CMP;
+            keyFn  = DATE_KEY;
+        }
+
+        CleanedRecord[] arr;
+
+        switch (algorithm) {
+            case "TimSort"             -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.timSort(arr, cmp); }
+            case "CombSort"            -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.combSort(arr, cmp); }
+            case "SelectionSort"       -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.selectionSort(arr, cmp); }
+            case "TreeSort"            -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.treeSort(arr, cmp); }
+            case "PigeonholeSort"      -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.pigeonholeSort(arr, cmp, keyFn); }
+            case "BucketSort"          -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.bucketSort(arr, cmp, keyFn); }
+            case "QuickSort"           -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.quickSort(arr, cmp); }
+            case "HeapSort"            -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.heapSort(arr, cmp); }
+            case "BitonicSort"         -> {
+                int p = nextPowerOfTwo(n);
+                CleanedRecord[] padded = Arrays.copyOf(master, p);
+                Arrays.fill(padded, n, p, buildSentinel(cmp));
+                SortingAlgorithms.bitonicSort(padded, cmp);
+                arr = Arrays.copyOf(padded, n);
+            }
+            case "GnomeSort"           -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.gnomeSort(arr, cmp); }
+            case "BinaryInsertionSort" -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.binaryInsertionSort(arr, cmp); }
+            case "RadixSort"           -> { arr = Arrays.copyOf(master, n); SortingAlgorithms.radixSort(arr, cmp, keyFn); }
+            default -> throw new IllegalArgumentException("Algoritmo desconocido: " + algorithm);
+        }
+
+        List<CleanedRecordDto> result = new ArrayList<>();
+        for (int i = 0; i < Math.min(limit, arr.length); i++) {
+            result.add(new CleanedRecordDto(arr[i]));
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers internos
     // -------------------------------------------------------------------------
 
@@ -70,53 +129,52 @@ public class SortingBenchmark {
                                              Comparator<CleanedRecord> cmp,
                                              ToLongFunction<CleanedRecord> keyFn) {
         List<SortingResultDto> results = new ArrayList<>();
-        int n    = master.length;
-        int nSub = Math.min(SUBSET_SIZE, n);
+        int n = Math.min(master.length, DATASET_SIZE);
 
         // Sentinela para Bitonic Sort: máximo en el orden del comparador dado
         CleanedRecord sentinel = buildSentinel(cmp);
 
-        results.add(time("TimSort",              n,    () -> {
+        results.add(time("TimSort",             n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.timSort(a, cmp);
         }));
 
-        results.add(time("CombSort",             n,    () -> {
+        results.add(time("CombSort",            n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.combSort(a, cmp);
         }));
 
-        results.add(time("SelectionSort",        nSub, () -> {
-            CleanedRecord[] a = Arrays.copyOf(master, nSub);
+        results.add(time("SelectionSort",       n, () -> {
+            CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.selectionSort(a, cmp);
         }));
 
-        results.add(time("TreeSort",             n,    () -> {
+        results.add(time("TreeSort",            n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.treeSort(a, cmp);
         }));
 
-        results.add(time("PigeonholeSort",       n,    () -> {
+        results.add(time("PigeonholeSort",      n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.pigeonholeSort(a, cmp, keyFn);
         }));
 
-        results.add(time("BucketSort",           n,    () -> {
+        results.add(time("BucketSort",          n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.bucketSort(a, cmp, keyFn);
         }));
 
-        results.add(time("QuickSort",            n,    () -> {
+        results.add(time("QuickSort",           n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.quickSort(a, cmp);
         }));
 
-        results.add(time("HeapSort",             n,    () -> {
+        results.add(time("HeapSort",            n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.heapSort(a, cmp);
         }));
 
-        results.add(time("BitonicSort",          n,    () -> {
+        results.add(time("BitonicSort",         n, () -> {
             int p = nextPowerOfTwo(n);
             CleanedRecord[] padded = Arrays.copyOf(master, p);
             Arrays.fill(padded, n, p, sentinel);
@@ -124,17 +182,17 @@ public class SortingBenchmark {
             // resultado queda en padded[0..n-1]
         }));
 
-        results.add(time("GnomeSort",            nSub, () -> {
-            CleanedRecord[] a = Arrays.copyOf(master, nSub);
+        results.add(time("GnomeSort",           n, () -> {
+            CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.gnomeSort(a, cmp);
         }));
 
-        results.add(time("BinaryInsertionSort",  nSub, () -> {
-            CleanedRecord[] a = Arrays.copyOf(master, nSub);
+        results.add(time("BinaryInsertionSort", n, () -> {
+            CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.binaryInsertionSort(a, cmp);
         }));
 
-        results.add(time("RadixSort",            n,    () -> {
+        results.add(time("RadixSort",           n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
             SortingAlgorithms.radixSort(a, cmp, keyFn);
         }));
@@ -145,9 +203,11 @@ public class SortingBenchmark {
     private List<CleanedRecordDto> extractTop15(CleanedRecord[] master) {
         int n = master.length;
         CleanedRecord[] arr = Arrays.copyOf(master, n);
-        SortingAlgorithms.heapSort(arr, VOLUME_CMP);   // DESC por volumen
+        SortingAlgorithms.heapSort(arr, VOLUME_CMP);   // ASC por volumen
+        // Los 15 de mayor volumen quedan al final; se devuelven en orden ascendente
         List<CleanedRecordDto> top15 = new ArrayList<>();
-        for (int i = 0; i < Math.min(15, n); i++) {
+        int start = Math.max(0, n - 15);
+        for (int i = start; i < n; i++) {
             top15.add(new CleanedRecordDto(arr[i]));
         }
         return top15;
@@ -178,10 +238,10 @@ public class SortingBenchmark {
             s.setClose(BigDecimal.valueOf(Double.MAX_VALUE));
             s.setVolume(Long.MAX_VALUE);
         } else {
-            // VolumeComparator es DESC: "mayor" en el orden = menor volumen real
-            s.setDate(LocalDate.of(1970, 1, 1));
-            s.setClose(BigDecimal.ZERO);
-            s.setVolume(Long.MIN_VALUE);
+            // VolumeComparator es ASC: "mayor" en el orden = mayor volumen real
+            s.setDate(LocalDate.of(9999, 12, 31));
+            s.setClose(BigDecimal.valueOf(Double.MAX_VALUE));
+            s.setVolume(Long.MAX_VALUE);
         }
         s.setSymbol("__SENTINEL__");
         s.setOpen(BigDecimal.ZERO);
