@@ -11,22 +11,22 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 /**
- * Builds a unified trading calendar from observed data across all symbols.
+ * Construye un calendario bursátil unificado a partir de los datos observados de todos los activos.
  *
- * Strategy: Observable-Calendar Approach.
- * A date is included in the unified calendar if and only if it appears in the
- * downloaded data of at least one symbol, and it is not a weekend.
+ * Estrategia: Enfoque de Calendario Observable (Observable-Calendar Approach).
+ * Una fecha se incluye en el calendario unificado si y solo si aparece en los datos
+ * descargados de al menos un activo y no es fin de semana.
  *
- * Complexity: O(N·D) where N = number of symbols, D = average days per series.
+ * Complejidad: O(N·D) donde N = número de activos, D = días promedio por serie.
  */
 @Service
 public class TradingCalendarService {
 
     /**
-     * Builds a unified, sorted set of trading dates from all series.
+     * Construye un conjunto ordenado y unificado de fechas bursátiles a partir de todas las series.
      *
-     * @param allSeries all financial series with their price records loaded
-     * @return NavigableSet of dates (ascending), excluding weekends
+     * @param allSeries todas las series financieras con sus registros de precio cargados
+     * @return NavigableSet de fechas (ascendente), excluyendo fines de semana
      */
     public NavigableSet<LocalDate> buildUnifiedCalendar(List<FinancialSeries> allSeries) {
         TreeSet<LocalDate> calendar = new TreeSet<>();

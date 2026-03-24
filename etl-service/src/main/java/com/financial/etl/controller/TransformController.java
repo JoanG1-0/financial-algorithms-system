@@ -31,9 +31,9 @@ public class TransformController {
     }
 
     /**
-     * Triggers the full transformation pipeline.
+     * Ejecuta el pipeline completo de transformación.
      *
-     * @return 202 Accepted with TransformSummary
+     * @return 202 Accepted con TransformSummary
      */
     @PostMapping
     public ResponseEntity<TransformSummary> transform() {
@@ -42,9 +42,9 @@ public class TransformController {
     }
 
     /**
-     * Returns counts of CleanedRecord rows grouped by DataQuality.
+     * Devuelve el conteo de registros CleanedRecord agrupados por DataQuality.
      *
-     * @return 200 OK with map of quality → count
+     * @return 200 OK con mapa de calidad → conteo
      */
     @GetMapping("/status")
     public ResponseEntity<Map<String, Long>> status() {
@@ -63,11 +63,27 @@ public class TransformController {
     }
 
     /**
-     * Returns close prices grouped by ticker for algorithm-service consumption.
+     * Devuelve el conteo de registros rellenos (FORWARD_FILLED) por activo.
+     * Permite verificar cuántas fechas faltaban en cada serie antes del relleno.
      *
-     * <p>Only includes records with quality CLEAN or FORWARD_FILLED, ordered by date ASC.
+     * @return 200 OK con mapa de símbolo → cantidad de registros FORWARD_FILLED
+     */
+    @GetMapping("/missing-per-symbol")
+    public ResponseEntity<Map<String, Long>> missingPerSymbol() {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (CleanedRecordRepository.SymbolMissingCount smc :
+                cleanedRecordRepository.countForwardFilledPerSymbol()) {
+            result.put(smc.getSymbol(), smc.getTotal());
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Devuelve los precios de cierre agrupados por ticker para consumo del algorithm-service.
      *
-     * @return 200 OK with map of ticker → double[] of close prices
+     * <p>Solo incluye registros con calidad CLEAN o FORWARD_FILLED, ordenados por fecha ASC.
+     *
+     * @return 200 OK con mapa de ticker → double[] de precios de cierre
      */
     @GetMapping("/cleaned-prices")
     public ResponseEntity<Map<String, double[]>> cleanedPrices() {

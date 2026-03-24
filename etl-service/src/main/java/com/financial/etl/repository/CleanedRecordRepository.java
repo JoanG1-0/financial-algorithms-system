@@ -19,8 +19,18 @@ public interface CleanedRecordRepository extends JpaRepository<CleanedRecord, Lo
 
     Page<CleanedRecord> findBySymbolOrderByDateDesc(String symbol, Pageable pageable);
 
+    @Query("SELECT c.symbol AS symbol, COUNT(c) AS total FROM CleanedRecord c " +
+           "WHERE c.dataQuality = com.financial.etl.entity.DataQuality.FORWARD_FILLED " +
+           "GROUP BY c.symbol ORDER BY c.symbol ASC")
+    List<SymbolMissingCount> countForwardFilledPerSymbol();
+
     interface QualityCount {
         DataQuality getQuality();
+        Long getTotal();
+    }
+
+    interface SymbolMissingCount {
+        String getSymbol();
         Long getTotal();
     }
 }

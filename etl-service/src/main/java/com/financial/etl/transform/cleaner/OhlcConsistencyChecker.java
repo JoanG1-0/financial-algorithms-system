@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Validates and corrects OHLC consistency for each price record.
+ * Valida y corrige la consistencia OHLC de cada registro de precio.
  *
- * Rules:
- * - Price <= 0 → ANOMALY_FLAGGED, anomalyType = ZERO_PRICE
- * - low > high → swap low↔high → ANOMALY_CORRECTED, anomalyType = OHLC_INCONSISTENCY
- * - Other OHLC violation (e.g. open/close outside [low,high]) → ANOMALY_FLAGGED, anomalyType = OHLC_INCONSISTENCY
- * - Valid → CLEAN
+ * Reglas:
+ * - Precio <= 0 → ANOMALY_FLAGGED, anomalyType = ZERO_PRICE
+ * - low > high → intercambio low↔high → ANOMALY_CORRECTED, anomalyType = OHLC_INCONSISTENCY
+ * - Otra violación OHLC (ej. open/close fuera de [low,high]) → ANOMALY_FLAGGED, anomalyType = OHLC_INCONSISTENCY
+ * - Válido → CLEAN
  */
 @Service
 public class OhlcConsistencyChecker {
@@ -26,11 +26,11 @@ public class OhlcConsistencyChecker {
     public static final String ZERO_PRICE = "ZERO_PRICE";
 
     /**
-     * Validates each price record and produces a CleanedRecord with quality metadata.
+     * Valida cada registro de precio y produce un CleanedRecord con metadatos de calidad.
      *
-     * @param symbol  the symbol being processed
-     * @param records raw price records for the symbol
-     * @return list of CleanedRecord (one per input record, not yet persisted)
+     * @param symbol  símbolo del activo en procesamiento
+     * @param records registros de precio sin procesar del activo
+     * @return lista de CleanedRecord (uno por registro de entrada, aún no persistido)
      */
     public List<CleanedRecord> validate(String symbol, List<PriceRecord> records) {
         List<CleanedRecord> result = new ArrayList<>(records.size());
@@ -51,7 +51,7 @@ public class OhlcConsistencyChecker {
                 cr.setDataQuality(DataQuality.ANOMALY_FLAGGED);
                 cr.setAnomalyType(ZERO_PRICE);
             } else if (isSimpleInversion(pr)) {
-                // low > high: swap to correct
+                // low > high: intercambio para corregir
                 cr.setLow(pr.getHigh());
                 cr.setHigh(pr.getLow());
                 cr.setOriginalClose(pr.getClose());
@@ -82,7 +82,7 @@ public class OhlcConsistencyChecker {
     }
 
     /**
-     * Simple inversion: low > high (and both non-null/positive).
+     * Inversión simple: low > high (ambos no nulos y positivos).
      */
     private boolean isSimpleInversion(PriceRecord pr) {
         return pr.getLow() != null && pr.getHigh() != null
@@ -90,7 +90,7 @@ public class OhlcConsistencyChecker {
     }
 
     /**
-     * Any remaining OHLC violation: open or close outside [low, high].
+     * Cualquier violación OHLC restante: open o close fuera del rango [low, high].
      */
     private boolean hasOhlcViolation(PriceRecord pr) {
         if (pr.getLow() == null || pr.getHigh() == null) {

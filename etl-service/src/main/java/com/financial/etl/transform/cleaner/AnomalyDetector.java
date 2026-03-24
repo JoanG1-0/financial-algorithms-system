@@ -8,16 +8,16 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Detects extreme price returns using Z-score analysis on logarithmic returns.
+ * Detecta retornos extremos de precios mediante análisis Z-score sobre retornos logarítmicos.
  *
- * Algorithm:
- * 1. Compute log-returns only over consecutive NON-forward-filled records
+ * Algoritmo:
+ * 1. Calcula retornos logarítmicos solo sobre registros consecutivos NO rellenos (non-forward-filled)
  *    r_t = ln(close_t / close_{t-1})
- * 2. Compute μ and σ over those returns
- * 3. For each record (including FORWARD_FILLED), compute z-score using the last known real close
- * 4. If |z| > Z_THRESHOLD and record is CLEAN or ANOMALY_CORRECTED → ANOMALY_FLAGGED
+ * 2. Calcula μ y σ sobre esos retornos
+ * 3. Para cada registro (incluidos FORWARD_FILLED), calcula el z-score usando el último cierre real conocido
+ * 4. Si |z| > Z_THRESHOLD y el registro es CLEAN o ANOMALY_CORRECTED → ANOMALY_FLAGGED
  *
- * Complexity: O(D) per symbol, 2 passes.
+ * Complejidad: O(D) por activo, 2 pasadas.
  */
 @Service
 public class AnomalyDetector {
@@ -27,11 +27,11 @@ public class AnomalyDetector {
     public static final String EXTREME_RETURN = "EXTREME_RETURN";
 
     /**
-     * Marks records with extreme log-returns as ANOMALY_FLAGGED.
-     * Does NOT modify records already flagged for other reasons.
+     * Marca como ANOMALY_FLAGGED los registros con retornos logarítmicos extremos.
+     * NO modifica registros ya marcados por otras razones.
      *
-     * @param records aligned records for a single symbol (from MissingValueCleaner)
-     * @return the same list, mutated in-place where anomalies are detected
+     * @param records registros alineados de un único activo (salida de MissingValueCleaner)
+     * @return la misma lista, modificada en el lugar donde se detectaron anomalías
      */
     public List<CleanedRecord> detectExtremeReturns(List<CleanedRecord> records) {
         if (records.size() < 2) {
@@ -56,8 +56,8 @@ public class AnomalyDetector {
         return records;
     }
 
-    // Pass 1: collect log-returns from non-forward-filled consecutive pairs
-    // Returns [sumR, sumR2, count]
+    // Pasada 1: recolecta retornos logarítmicos de pares consecutivos no rellenos
+    // Devuelve [sumR, sumR2, count]
     private double[] collectReturnStats(List<CleanedRecord> records) {
         double sumR = 0.0;
         double sumR2 = 0.0;
@@ -86,7 +86,7 @@ public class AnomalyDetector {
         return new double[]{sumR, sumR2, count};
     }
 
-    // Pass 2: flag records whose z-score exceeds the threshold
+    // Pasada 2: marca registros cuyo z-score supera el umbral
     private void flagExtremeReturns(List<CleanedRecord> records, double mean, double stdDev) {
         BigDecimal lastRealClose = null;
         for (CleanedRecord cr : records) {

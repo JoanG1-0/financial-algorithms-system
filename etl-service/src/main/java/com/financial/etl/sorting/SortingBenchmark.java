@@ -68,7 +68,7 @@ public class SortingBenchmark {
 
     /**
      * Ejecuta el algoritmo indicado con el criterio dado y devuelve los primeros
-     * {@code limit} registros ordenados, permitiendo verificar el orden real.
+     * {@code limit} registros realmente ordenados, permitiendo verificar el orden real.
      *
      * @param algorithm nombre exacto: TimSort, CombSort, SelectionSort, TreeSort,
      *                  PigeonholeSort, BucketSort, QuickSort, HeapSort, BitonicSort,
@@ -131,7 +131,7 @@ public class SortingBenchmark {
         List<SortingResultDto> results = new ArrayList<>();
         int n = Math.min(master.length, DATASET_SIZE);
 
-        // Sentinela para Bitonic Sort: máximo en el orden del comparador dado
+        // Centinela para Bitonic Sort: el máximo bajo el comparador dado
         CleanedRecord sentinel = buildSentinel();
 
         results.add(time("TimSort",             n, () -> {
@@ -179,7 +179,7 @@ public class SortingBenchmark {
             CleanedRecord[] padded = Arrays.copyOf(master, p);
             Arrays.fill(padded, n, p, sentinel);
             SortingAlgorithms.bitonicSort(padded, cmp);
-            // resultado queda en padded[0..n-1]
+            // el resultado queda en padded[0..n-1]
         }));
 
         results.add(time("GnomeSort",           n, () -> {
@@ -227,8 +227,8 @@ public class SortingBenchmark {
     }
 
     /**
-     * Construye un registro sentinela que sea "el mayor" bajo el comparador dado,
-     * para usar como relleno en Bitonic Sort.
+     * Construye un registro centinela que sea "el mayor" en cualquier comparador,
+     * para usarlo como relleno en Bitonic Sort.
      */
     private static CleanedRecord buildSentinel() {
         CleanedRecord s = new CleanedRecord();

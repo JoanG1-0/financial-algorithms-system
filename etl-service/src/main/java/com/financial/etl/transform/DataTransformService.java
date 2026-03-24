@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.NavigableSet;
 
 /**
- * Orchestrates the full data transformation pipeline.
+ * Orquesta el pipeline completo de transformación de datos.
  *
  * Pipeline:
- * 1. Build unified trading calendar from all observed dates (excl. weekends)
- * 2. Per symbol: OHLC validation → gap filling → anomaly detection
- * 3. Persist all CleanedRecords (replace previous run)
+ * 1. Construir calendario bursátil unificado a partir de todas las fechas observadas (excl. fines de semana)
+ * 2. Por activo: validación OHLC → relleno de huecos → detección de anomalías
+ * 3. Persistir todos los CleanedRecords (reemplaza la ejecución anterior)
  */
 @Service
 public class DataTransformService {
@@ -52,39 +52,39 @@ public class DataTransformService {
     }
 
     /**
-     * Executes the full transformation pipeline over all available series.
+     * Ejecuta el pipeline completo de transformación sobre todas las series disponibles.
      *
-     * @return summary statistics of the transformation run
+     * @return estadísticas resumen de la ejecución de transformación
      */
     @Transactional
     public TransformSummary transformAll() {
-        // Load all series with their price records
+        // Carga todas las series con sus registros de precio
         List<FinancialSeries> allSeries = seriesRepository.findAllWithPriceRecords();
 
-        // Step 1: Build unified trading calendar
+        // Paso 1: Construir calendario bursátil unificado
         NavigableSet<LocalDate> calendar = calendarService.buildUnifiedCalendar(allSeries);
 
-        // Step 2: Process each symbol
+        // Paso 2: Procesar cada activo
         List<CleanedRecord> allCleanedRecords = new ArrayList<>();
 
         for (FinancialSeries series : allSeries) {
             String symbol = series.getSymbol();
 
-            // 2a. OHLC consistency check
+            // 2a. Verificación de consistencia OHLC
             List<CleanedRecord> validated = ohlcChecker.validate(symbol, series.getPriceRecords());
 
-            // 2b. Fill missing dates using unified calendar
+            // 2b. Relleno de fechas faltantes usando el calendario unificado
             List<CleanedRecord> aligned = missingValueCleaner.fill(symbol, calendar, validated);
 
-            // 2c. Detect extreme returns
+            // 2c. Detección de retornos extremos
             List<CleanedRecord> finalRecords = anomalyDetector.detectExtremeReturns(aligned);
 
             allCleanedRecords.addAll(finalRecords);
         }
 
-        // Step 3: Persist (replace previous run)
-        // flush() forces Hibernate to send DELETE SQL before INSERT to avoid
-        // unique constraint (symbol, date) violations when re-running the pipeline
+        // Paso 3: Persistir (reemplaza la ejecución anterior)
+        // flush() fuerza a Hibernate a enviar el DELETE SQL antes del INSERT para evitar
+        // violaciones de restricción única (symbol, date) al re-ejecutar el pipeline
         cleanedRecordRepository.deleteAll();
         cleanedRecordRepository.flush();
         cleanedRecordRepository.saveAll(allCleanedRecords);
