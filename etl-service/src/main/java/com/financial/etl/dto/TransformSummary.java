@@ -14,7 +14,7 @@ public class TransformSummary {
     private LocalDateTime transformedAt;
 
     public TransformSummary() {
-        // Required for JSON deserialization (Jackson)
+        // Requerido para deserialización JSON (Jackson)
     }
 
     public static Builder builder() {
