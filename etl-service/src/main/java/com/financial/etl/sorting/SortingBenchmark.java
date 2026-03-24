@@ -104,7 +104,7 @@ public class SortingBenchmark {
             case "BitonicSort"         -> {
                 int p = nextPowerOfTwo(n);
                 CleanedRecord[] padded = Arrays.copyOf(master, p);
-                Arrays.fill(padded, n, p, buildSentinel(cmp));
+                Arrays.fill(padded, n, p, buildSentinel());
                 SortingAlgorithms.bitonicSort(padded, cmp);
                 arr = Arrays.copyOf(padded, n);
             }
@@ -132,7 +132,7 @@ public class SortingBenchmark {
         int n = Math.min(master.length, DATASET_SIZE);
 
         // Sentinela para Bitonic Sort: máximo en el orden del comparador dado
-        CleanedRecord sentinel = buildSentinel(cmp);
+        CleanedRecord sentinel = buildSentinel();
 
         results.add(time("TimSort",             n, () -> {
             CleanedRecord[] a = Arrays.copyOf(master, n);
@@ -230,19 +230,12 @@ public class SortingBenchmark {
      * Construye un registro sentinela que sea "el mayor" bajo el comparador dado,
      * para usar como relleno en Bitonic Sort.
      */
-    private static CleanedRecord buildSentinel(Comparator<CleanedRecord> cmp) {
+    private static CleanedRecord buildSentinel() {
         CleanedRecord s = new CleanedRecord();
-        if (cmp instanceof ActivoComparator) {
-            // Mayor fecha + mayor close = sentinela máxima para DATE_CLOSE_CMP
-            s.setDate(LocalDate.of(9999, 12, 31));
-            s.setClose(BigDecimal.valueOf(Double.MAX_VALUE));
-            s.setVolume(Long.MAX_VALUE);
-        } else {
-            // VolumeComparator es ASC: "mayor" en el orden = mayor volumen real
-            s.setDate(LocalDate.of(9999, 12, 31));
-            s.setClose(BigDecimal.valueOf(Double.MAX_VALUE));
-            s.setVolume(Long.MAX_VALUE);
-        }
+        // Sentinela máxima bajo cualquier comparador: fecha máxima, close máximo, volumen máximo
+        s.setDate(LocalDate.of(9999, 12, 31));
+        s.setClose(BigDecimal.valueOf(Double.MAX_VALUE));
+        s.setVolume(Long.MAX_VALUE);
         s.setSymbol("__SENTINEL__");
         s.setOpen(BigDecimal.ZERO);
         s.setHigh(BigDecimal.ZERO);
