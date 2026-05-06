@@ -5,6 +5,7 @@ import com.financial.etl.entity.BatchStatus;
 import com.financial.etl.entity.FinancialSeries;
 import com.financial.etl.exception.DataDownloadException;
 import com.financial.etl.repository.BatchDownloadLogRepository;
+import com.financial.etl.transform.DataTransformService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,9 @@ class BatchDownloadServiceTest {
 
     @Mock
     private BatchDownloadLogRepository logRepository;
+
+    @Mock
+    private DataTransformService dataTransformService;
 
     @InjectMocks
     private BatchDownloadService batchDownloadService;

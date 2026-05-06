@@ -3,6 +3,7 @@ package com.financial.etl.service;
 import com.financial.etl.entity.BatchDownloadLog;
 import com.financial.etl.entity.BatchStatus;
 import com.financial.etl.repository.BatchDownloadLogRepository;
+import com.financial.etl.transform.DataTransformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,16 +32,20 @@ public class BatchDownloadService {
 
     private final EtlService etlService;
     private final BatchDownloadLogRepository logRepository;
+    private final DataTransformService dataTransformService;
 
-    public BatchDownloadService(EtlService etlService, BatchDownloadLogRepository logRepository) {
+    public BatchDownloadService(EtlService etlService, BatchDownloadLogRepository logRepository,
+                                DataTransformService dataTransformService) {
         this.etlService = etlService;
         this.logRepository = logRepository;
+        this.dataTransformService = dataTransformService;
     }
 
     @Async("batchTaskExecutor")
     public void downloadAllSymbols() {
         if (isAlreadyRunningOrCompleted()) {
             log.info("Batch ya ejecutado o en progreso hoy ({}). Saltando descarga.", LocalDate.now());
+            runTransform();
             return;
         }
 
@@ -61,6 +66,7 @@ public class BatchDownloadService {
             }
 
             finalizeBatchLog(batchLog);
+            runTransform();
 
         } catch (Exception e) {
             markBatchAsFailed(batchLog, e.getMessage());
@@ -70,6 +76,16 @@ public class BatchDownloadService {
 
     public Optional<BatchDownloadLog> getLastBatchStatus() {
         return logRepository.findFirstByDownloadDateOrderByStartedAtDesc(LocalDate.now());
+    }
+
+    private void runTransform() {
+        log.info("Iniciando transformación automática de datos financieros...");
+        try {
+            dataTransformService.transformAll();
+            log.info("Transformación automática completada.");
+        } catch (Exception e) {
+            log.error("Error durante la transformación automática", e);
+        }
     }
 
     private boolean isAlreadyRunningOrCompleted() {
