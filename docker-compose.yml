@@ -163,6 +163,26 @@ services:
       report-service:
         condition: service_started
 
+  # ---------------------------------------------------------------------------
+  # Frontend - Dashboard Next.js (puerto 3000)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: GUI-financial-algorithm-system
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8081}
+    container_name: financial-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8081}
+    networks:
+      - financial-network
+    depends_on:
+      gateway-service:
+        condition: service_started
+
 # =============================================================================
 # Volúmenes persistentes - Los datos sobreviven a reinicios
 # =============================================================================
