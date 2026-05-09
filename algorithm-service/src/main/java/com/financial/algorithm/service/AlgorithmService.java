@@ -20,7 +20,6 @@ import com.financial.algorithm.similarity.CosineSimilarity;
 import com.financial.algorithm.similarity.DynamicTimeWarping;
 import com.financial.algorithm.similarity.EuclideanDistance;
 import com.financial.algorithm.similarity.PearsonCorrelation;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +45,7 @@ import java.util.Map;
 @Service
 public class AlgorithmService {
 
-    private static final int DEFAULT_SMA_WINDOW = 20;
+    private static final List<Integer> SMA_WINDOWS = List.of(20, 50, 100);
     private static final int CONSECUTIVE_UP_K = 5;
     private static final double MEAN_REVERSION_WINDOW = 20;
     private static final double MEAN_REVERSION_THRESHOLD = 2.0;
@@ -64,9 +63,6 @@ public class AlgorithmService {
     private final RiskRepository riskRepository;
     private final PatternRepository patternRepository;
     private final SmaRepository smaRepository;
-
-    @Value("${algorithm.sma.window:20}")
-    private int smaWindow;
 
     public AlgorithmService(EtlServiceClient etlServiceClient,
                             EuclideanDistance euclideanDistance,
@@ -281,15 +277,17 @@ public class AlgorithmService {
                                         List<String> tickers,
                                         LocalDateTime now) {
         List<SmaRecord> records = new ArrayList<>();
-        int window = smaWindow > 0 ? smaWindow : DEFAULT_SMA_WINDOW;
         for (String ticker : tickers) {
-            double[] values = simpleMovingAverage.compute(portfolio.get(ticker), window);
-            SmaRecord rec = new SmaRecord();
-            rec.setSymbol(ticker);
-            rec.setWindow(window);
-            rec.setValuesJson(Arrays.toString(values));
-            rec.setComputedAt(now);
-            records.add(rec);
+            double[] prices = portfolio.get(ticker);
+            for (int window : SMA_WINDOWS) {
+                double[] values = simpleMovingAverage.compute(prices, window);
+                SmaRecord rec = new SmaRecord();
+                rec.setSymbol(ticker);
+                rec.setWindow(window);
+                rec.setValuesJson(Arrays.toString(values));
+                rec.setComputedAt(now);
+                records.add(rec);
+            }
         }
         return records;
     }

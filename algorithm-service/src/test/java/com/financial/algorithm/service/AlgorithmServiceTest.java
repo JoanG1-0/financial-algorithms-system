@@ -87,8 +87,8 @@ class AlgorithmServiceTest {
         assertEquals(2, summary.riskProfiles());
         // 2 activos × 2 patrones = 4 registros
         assertEquals(4, summary.patternRecords());
-        // 2 registros SMA
-        assertEquals(2, summary.smaRecords());
+        // 2 activos × 3 ventanas (20, 50, 100) = 6 registros SMA
+        assertEquals(6, summary.smaRecords());
 
         verify(similarityRepository).saveAll(any());
         verify(riskRepository).saveAll(any());
